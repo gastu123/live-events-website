@@ -1,0 +1,1525 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#070707" />
+    <meta
+      name="description"
+      content="Discover live events, purchase verified tickets and apply for exclusive membership."
+    />
+    <title>Live Events | Tickets & Membership</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+
+    <header class="site-header" id="site-header">
+      <div class="header-inner container">
+        <a
+          class="brand"
+          href="#home"
+          data-route="home"
+          aria-label="Go to homepage"
+        >
+          <span class="brand-mark" aria-hidden="true">M</span>
+          <span class="brand-name">LIVE</span>
+        </a>
+
+        <nav class="desktop-nav" aria-label="Main navigation">
+          <a href="#home" data-route="home" class="nav-link is-active">Home</a>
+          <a href="#events" data-route="events" class="nav-link">Events</a>
+          <a href="#membership" data-route="membership" class="nav-link"
+            >Membership</a
+          >
+          <a href="#services" data-route="services" class="nav-link"
+            >Services</a
+          >
+          <a href="#support" data-route="support" class="nav-link">Support</a>
+        </nav>
+
+        <div class="header-actions">
+          <button
+            class="icon-button"
+            type="button"
+            data-action="open-search"
+            aria-label="Search events"
+          >
+            <span aria-hidden="true">⌕</span>
+          </button>
+          <button class="account-button" type="button" data-route="account">
+            Account
+          </button>
+          <button
+            class="menu-button"
+            type="button"
+            data-action="toggle-menu"
+            aria-expanded="false"
+            aria-controls="mobile-menu"
+          >
+            <span class="menu-line" aria-hidden="true"></span>
+            <span class="menu-line" aria-hidden="true"></span>
+            <span class="menu-line" aria-hidden="true"></span>
+            <span class="sr-only">Open menu</span>
+          </button>
+        </div>
+      </div>
+
+      <nav
+        class="mobile-menu"
+        id="mobile-menu"
+        aria-label="Mobile navigation"
+        hidden
+      >
+        <a href="#home" data-route="home">Home</a>
+        <a href="#events" data-route="events">Events</a>
+        <a href="#membership" data-route="membership">Membership</a>
+        <a href="#services" data-route="services">Services</a>
+        <a href="#support" data-route="support">Support</a>
+        <a href="#account" data-route="account">My account</a>
+      </nav>
+    </header>
+
+    <main id="main-content">
+      <!-- HOME PAGE -->
+      <section
+        class="page is-active"
+        id="page-home"
+        data-page="home"
+        aria-labelledby="home-title"
+      >
+        <section class="hero" aria-labelledby="home-title">
+          <div
+            class="hero-background"
+            role="img"
+            aria-label="Live comedy show stage and audience"
+          ></div>
+          <div class="hero-overlay"></div>
+          <div class="hero-content container">
+            <p class="eyebrow">THE LIVE EXPERIENCE</p>
+            <h1 id="home-title">Live. Unfiltered.<br />Unforgettable.</h1>
+            <p class="hero-copy">
+              Official tickets, exclusive memberships and unforgettable live
+              experiences—all in one place.
+            </p>
+            <div class="hero-actions">
+              <button
+                class="button button-primary"
+                type="button"
+                data-route="events"
+              >
+                Get tickets
+              </button>
+              <button
+                class="button button-outline"
+                type="button"
+                data-route="membership"
+              >
+                Join membership
+              </button>
+            </div>
+            <ul class="trust-list" aria-label="Purchase benefits">
+              <li>Verified tickets</li>
+              <li>Secure checkout</li>
+              <li>Instant confirmation</li>
+            </ul>
+          </div>
+        </section>
+
+        <section
+          class="content-section container"
+          aria-labelledby="featured-events-title"
+        >
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">DON'T MISS OUT</p>
+              <h2 id="featured-events-title">Upcoming shows</h2>
+            </div>
+            <button class="text-link" type="button" data-route="events">
+              See all events <span aria-hidden="true">→</span>
+            </button>
+          </div>
+
+          <div class="event-grid">
+            <article class="event-card event-card-featured">
+              <div class="event-image-wrap">
+                <img
+                  src="upload/01-1000193436.jpg"
+                  alt="Matt Rife Unwrapped comedy special artwork"
+                  class="event-image"
+                />
+                <span class="event-badge">Selling fast</span>
+              </div>
+              <div class="event-card-content">
+                <p class="event-type">Comedy tour</p>
+                <h3>Matt Rife — Live</h3>
+                <dl class="event-meta">
+                  <div>
+                    <dt>Date</dt>
+                    <dd>Friday, September 4 • 8:00 PM</dd>
+                  </div>
+                  <div>
+                    <dt>Venue</dt>
+                    <dd>Mohegan Sun Arena, Connecticut</dd>
+                  </div>
+                </dl>
+                <div class="event-card-footer">
+                  <p class="event-price"><span>From</span> $134</p>
+                  <button
+                    class="button button-primary button-small"
+                    type="button"
+                    data-route="event-details"
+                  >
+                    View tickets
+                  </button>
+                </div>
+              </div>
+            </article>
+
+            <article class="event-card event-card-placeholder">
+              <div class="event-placeholder" aria-hidden="true">
+                <span>LIVE</span>
+              </div>
+              <div class="event-card-content">
+                <p class="event-type">Special event</p>
+                <h3>New Show Coming Soon</h3>
+                <p class="muted">
+                  More tour dates and locations will be announced soon.
+                </p>
+                <button
+                  class="button button-outline button-small"
+                  type="button"
+                  data-action="notify-event"
+                >
+                  Notify me
+                </button>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section
+          class="membership-banner container"
+          aria-labelledby="home-membership-title"
+        >
+          <div class="membership-icon" aria-hidden="true">M</div>
+          <div class="membership-banner-copy">
+            <p class="eyebrow">EXCLUSIVE ACCESS</p>
+            <h2 id="home-membership-title">Become a member</h2>
+            <p>
+              Get exclusive content, community announcements and selected
+              non-ticket experience updates.
+            </p>
+          </div>
+          <button
+            class="button button-primary"
+            type="button"
+            data-route="membership"
+          >
+            Apply now
+          </button>
+        </section>
+
+        <section
+          class="content-section container"
+          aria-labelledby="payment-title"
+        >
+          <div class="section-heading compact">
+            <div>
+              <p class="eyebrow">FLEXIBLE CHECKOUT</p>
+              <h2 id="payment-title">Pay your way</h2>
+            </div>
+          </div>
+          <div class="payment-logo-grid" aria-label="Available payment choices">
+            <div class="payment-logo">
+              <span class="payment-symbol" aria-hidden="true">▣</span
+              ><span>Card</span>
+            </div>
+            <div class="payment-logo">
+              <span class="payment-wordmark paypal" aria-hidden="true">P</span
+              ><span>PayPal</span>
+            </div>
+            <div class="payment-logo">
+              <span class="payment-wordmark" aria-hidden="true">$</span
+              ><span>Cash App</span>
+            </div>
+            <div class="payment-logo">
+              <span class="payment-wordmark chime" aria-hidden="true">C</span
+              ><span>Chime</span>
+            </div>
+            <div class="payment-logo">
+              <span class="payment-wordmark" aria-hidden="true">G</span
+              ><span>Gift Card</span>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <!-- EVENTS PAGE -->
+      <section
+        class="page"
+        id="page-events"
+        data-page="events"
+        aria-labelledby="events-title"
+        hidden
+      >
+        <div class="page-hero compact-hero">
+          <div class="container">
+            <p class="eyebrow">LIVE & UPCOMING</p>
+            <h1 id="events-title">Find your next show</h1>
+            <p>Browse available dates and secure your seats.</p>
+          </div>
+        </div>
+
+        <div class="container page-content">
+          <form class="event-filters" id="event-filter-form" role="search">
+            <label class="search-field">
+              <span class="sr-only">Search by artist, city or venue</span>
+              <input
+                type="search"
+                name="event-search"
+                placeholder="Search artist, city or venue"
+              />
+            </label>
+            <label>
+              <span class="sr-only">Choose city</span>
+              <select name="city">
+                <option value="">All cities</option>
+                <option value="uncasville">Uncasville</option>
+                <option value="new-york">New York</option>
+                <option value="los-angeles">Los Angeles</option>
+                <option value="london">London</option>
+              </select>
+            </label>
+            <label>
+              <span class="sr-only">Choose date</span>
+              <select name="date">
+                <option value="">Any date</option>
+                <option value="this-week">This week</option>
+                <option value="this-month">This month</option>
+                <option value="next-month">Next month</option>
+              </select>
+            </label>
+            <button class="button button-primary" type="submit">Search</button>
+          </form>
+
+          <div class="results-header">
+            <h2>Upcoming events</h2>
+            <p><strong id="event-count">4</strong> events found</p>
+          </div>
+
+          <div class="event-list" id="event-list">
+            <article
+              class="event-row"
+              data-city="uncasville"
+              data-date="this-week"
+            >
+              <div class="date-block">
+                <span>SEP</span><strong>04</strong><small>FRI</small>
+              </div>
+              <div class="event-row-main">
+                <p class="event-type">Comedy</p>
+                <h3>Matt Rife — Live</h3>
+                <p>8:00 PM • Mohegan Sun Arena, Uncasville, CT</p>
+              </div>
+              <div class="event-row-price">
+                <span>From</span><strong>$134</strong>
+              </div>
+              <button
+                class="button button-primary button-small"
+                type="button"
+                data-route="event-details"
+              >
+                Tickets
+              </button>
+            </article>
+            <article
+              class="event-row"
+              data-city="new-york"
+              data-date="this-month"
+            >
+              <div class="date-block">
+                <span>SEP</span><strong>12</strong><small>SAT</small>
+              </div>
+              <div class="event-row-main">
+                <p class="event-type">Comedy</p>
+                <h3>New York Live</h3>
+                <p>7:30 PM • Madison Square Garden, New York, NY</p>
+              </div>
+              <div class="event-row-price">
+                <span>From</span><strong>$98</strong>
+              </div>
+              <button
+                class="button button-primary button-small"
+                type="button"
+                data-route="event-details"
+              >
+                Tickets
+              </button>
+            </article>
+            <article
+              class="event-row"
+              data-city="los-angeles"
+              data-date="this-month"
+            >
+              <div class="date-block">
+                <span>SEP</span><strong>19</strong><small>SAT</small>
+              </div>
+              <div class="event-row-main">
+                <p class="event-type">Comedy</p>
+                <h3>Los Angeles Live</h3>
+                <p>8:00 PM • Crypto.com Arena, Los Angeles, CA</p>
+              </div>
+              <div class="event-row-price">
+                <span>From</span><strong>$115</strong>
+              </div>
+              <button
+                class="button button-primary button-small"
+                type="button"
+                data-route="event-details"
+              >
+                Tickets
+              </button>
+            </article>
+            <article
+              class="event-row"
+              data-city="london"
+              data-date="next-month"
+            >
+              <div class="date-block">
+                <span>OCT</span><strong>10</strong><small>SAT</small>
+              </div>
+              <div class="event-row-main">
+                <p class="event-type">Comedy</p>
+                <h3>London Live</h3>
+                <p>7:00 PM • The O2, London, UK</p>
+              </div>
+              <div class="event-row-price">
+                <span>From</span><strong>£92</strong>
+              </div>
+              <button
+                class="button button-primary button-small"
+                type="button"
+                data-route="event-details"
+              >
+                Tickets
+              </button>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- EVENT DETAILS AND TICKET SELECTION PAGE -->
+      <section
+        class="page"
+        id="page-event-details"
+        data-page="event-details"
+        aria-labelledby="event-details-title"
+        hidden
+      >
+        <div class="event-detail-hero">
+          <div
+            class="event-detail-image"
+            role="img"
+            aria-label="Live arena stage viewed from the audience"
+          ></div>
+          <div class="event-detail-overlay"></div>
+          <div class="container event-detail-heading">
+            <button class="back-button" type="button" data-route="events">
+              ← All events
+            </button>
+            <p class="eyebrow">FRIDAY, SEPTEMBER 4 • 8:00 PM</p>
+            <h1 id="event-details-title">Matt Rife — Live</h1>
+            <p>Mohegan Sun Arena • Uncasville, Connecticut</p>
+          </div>
+        </div>
+
+        <div class="container ticket-layout">
+          <section
+            class="ticket-selection"
+            aria-labelledby="choose-ticket-title"
+          >
+            <div class="section-heading compact">
+              <div>
+                <p class="eyebrow">AVAILABLE NOW</p>
+                <h2 id="choose-ticket-title">Choose your tickets</h2>
+              </div>
+              <span class="availability-dot">Tickets available</span>
+            </div>
+
+            <form id="ticket-form">
+              <fieldset class="quantity-fieldset">
+                <legend>Number of tickets</legend>
+                <div class="quantity-options" role="radiogroup">
+                  <label
+                    ><input
+                      type="radio"
+                      name="ticket-quantity"
+                      value="1"
+                    /><span>1</span></label
+                  >
+                  <label
+                    ><input
+                      type="radio"
+                      name="ticket-quantity"
+                      value="2"
+                      checked
+                    /><span>2</span></label
+                  >
+                  <label
+                    ><input
+                      type="radio"
+                      name="ticket-quantity"
+                      value="3"
+                    /><span>3</span></label
+                  >
+                  <label
+                    ><input
+                      type="radio"
+                      name="ticket-quantity"
+                      value="4"
+                    /><span>4</span></label
+                  >
+                </div>
+              </fieldset>
+
+              <div class="ticket-option-list">
+                <label class="ticket-option is-selected">
+                  <input
+                    type="radio"
+                    name="ticket-option"
+                    value="section-113"
+                    data-price="134"
+                    checked
+                  />
+                  <span class="ticket-option-main">
+                    <span class="ticket-option-heading"
+                      ><strong>Section 113</strong
+                      ><span class="rating">9.5 Amazing</span></span
+                    >
+                    <span class="ticket-benefits"
+                      >Order request • Section selection</span
+                    >
+                    <span class="scarcity"
+                      >Only 2 tickets left at this price</span
+                    >
+                  </span>
+                  <span class="ticket-option-price"
+                    ><small>Each</small><strong>$134</strong
+                    ><small>Fees included</small></span
+                  >
+                </label>
+
+                <label class="ticket-option">
+                  <input
+                    type="radio"
+                    name="ticket-option"
+                    value="section-114"
+                    data-price="118"
+                  />
+                  <span class="ticket-option-main">
+                    <span class="ticket-option-heading"
+                      ><strong>Section 114</strong
+                      ><span class="rating">9.1 Great</span></span
+                    >
+                    <span class="ticket-benefits"
+                      >Order request • Section selection</span
+                    >
+                  </span>
+                  <span class="ticket-option-price"
+                    ><small>Each</small><strong>$118</strong
+                    ><small>Fees included</small></span
+                  >
+                </label>
+
+                <label class="ticket-option">
+                  <input
+                    type="radio"
+                    name="ticket-option"
+                    value="floor-b"
+                    data-price="189"
+                  />
+                  <span class="ticket-option-main">
+                    <span class="ticket-option-heading"
+                      ><strong>Floor B</strong
+                      ><span class="rating">9.8 Best view</span></span
+                    >
+                    <span class="ticket-benefits"
+                      >Order request • Section selection</span
+                    >
+                  </span>
+                  <span class="ticket-option-price"
+                    ><small>Each</small><strong>$189</strong
+                    ><small>Fees included</small></span
+                  >
+                </label>
+              </div>
+            </form>
+          </section>
+
+          <aside class="order-summary" aria-labelledby="ticket-summary-title">
+            <h2 id="ticket-summary-title">Your selection</h2>
+            <div class="summary-event">
+              <img
+                src="upload/01-1000193436.jpg"
+                alt="Matt Rife event artwork"
+              />
+              <div>
+                <strong>Matt Rife — Live</strong
+                ><span>Fri, Sep 4 • 8:00 PM</span><span>Mohegan Sun Arena</span>
+              </div>
+            </div>
+            <dl class="summary-lines">
+              <div>
+                <dt>Section</dt>
+                <dd id="summary-section">113</dd>
+              </div>
+              <div>
+                <dt>Quantity</dt>
+                <dd id="summary-quantity">2 tickets</dd>
+              </div>
+              <div>
+                <dt>Ticket price</dt>
+                <dd id="summary-subtotal">$268.00</dd>
+              </div>
+              <div>
+                <dt>Service fee</dt>
+                <dd>$0.00</dd>
+              </div>
+              <div class="summary-total">
+                <dt>Total</dt>
+                <dd id="summary-total">$268.00</dd>
+              </div>
+            </dl>
+            <button
+              class="button button-primary button-full"
+              type="button"
+              data-route="checkout"
+            >
+              Continue to checkout
+            </button>
+            <p class="secure-note">Secure checkout • All fees included</p>
+          </aside>
+        </div>
+      </section>
+
+      <!-- CHECKOUT PAGE -->
+      <section
+        class="page checkout-page"
+        id="page-checkout"
+        data-page="checkout"
+        aria-labelledby="checkout-title"
+        hidden
+      >
+        <div class="container checkout-header">
+          <button class="back-button" type="button" data-route="event-details">
+            ← Back to tickets
+          </button>
+          <h1 id="checkout-title">Checkout</h1>
+          <div class="checkout-timer" aria-live="polite">
+            <span>Time remaining</span
+            ><strong id="checkout-timer">09:48</strong>
+          </div>
+        </div>
+
+        <div class="protection-banner">
+          <div class="container">
+            Order requests are held briefly while payment is arranged
+          </div>
+        </div>
+
+        <div class="container checkout-layout">
+          <form class="checkout-form" id="checkout-form">
+            <section class="form-card" aria-labelledby="contact-title">
+              <div class="step-heading">
+                <span>1</span>
+                <div>
+                  <h2 id="contact-title">Contact information</h2>
+                  <p>
+                    We will use these details for order and payment updates.
+                  </p>
+                </div>
+              </div>
+              <div class="form-grid">
+                <label class="full-width"
+                  ><span>Email address</span
+                  ><input
+                    type="email"
+                    name="email"
+                    autocomplete="email"
+                    required
+                    placeholder="you@example.com"
+                /></label>
+                <label
+                  ><span>First name</span
+                  ><input
+                    type="text"
+                    name="first-name"
+                    autocomplete="given-name"
+                    required
+                /></label>
+                <label
+                  ><span>Last name</span
+                  ><input
+                    type="text"
+                    name="last-name"
+                    autocomplete="family-name"
+                    required
+                /></label>
+                <label class="full-width"
+                  ><span>Phone number</span
+                  ><input
+                    type="tel"
+                    name="phone"
+                    autocomplete="tel"
+                    required
+                /></label>
+                <label class="full-width"
+                  ><span>Country</span
+                  ><select name="phone-country" required>
+                    <option value="">Select country</option>
+                    <option value="NG">Nigeria</option>
+                    <option value="US">United States</option>
+                    <option value="GB">United Kingdom</option>
+                    <option value="CA">Canada</option>
+                    <option value="OTHER">Other</option>
+                  </select></label>
+                <label class="full-width" data-other-country-field hidden
+                  ><span>Enter your country</span
+                  ><input type="text" name="phone-country-name" /></label>
+              </div>
+            </section>
+
+            <section class="form-card" aria-labelledby="payment-method-title">
+              <div class="step-heading">
+                <span>2</span>
+                <div>
+                  <h2 id="payment-method-title">Payment method</h2>
+                  <p>Select how you would like to pay.</p>
+                </div>
+              </div>
+              <div class="payment-method-list">
+                <label class="choice-card payment-choice is-selected"
+                  ><input
+                    type="radio"
+                    name="payment-method"
+                    value="paypal"
+                    checked
+                  /><span class="choice-icon">P</span
+                  ><span
+                    ><strong>PayPal</strong
+                    ><small>Administrator-assigned transfer details</small></span
+                  ></label
+                >
+                <label class="choice-card payment-choice"
+                  ><input
+                    type="radio"
+                    name="payment-method"
+                    value="cash-app"
+                  /><span class="choice-icon">$</span
+                  ><span
+                    ><strong>Cash App</strong
+                    ><small
+                      >Payment instructions shown after continuing</small
+                    ></span
+                  ></label
+                >
+                <label class="choice-card payment-choice"
+                  ><input
+                    type="radio"
+                    name="payment-method"
+                    value="chime"
+                  /><span class="choice-icon">C</span
+                  ><span
+                    ><strong>Chime</strong
+                    ><small
+                      >Payment instructions shown after continuing</small
+                    ></span
+                  ></label
+                >
+                <label class="choice-card payment-choice"
+                  ><input
+                    type="radio"
+                    name="payment-method"
+                    value="bank-transfer"
+                  /><span class="choice-icon">B</span
+                  ><span
+                    ><strong>Bank Transfer</strong
+                    ><small>Account details supplied for this order</small></span
+                  ></label
+                ><label class="choice-card payment-choice"
+                  ><input
+                    type="radio"
+                    name="payment-method"
+                    value="gift-card"
+                  /><span class="choice-icon">G</span
+                  ><span
+                    ><strong>Gift Card</strong
+                    ><small>Instructions shown after continuing</small></span
+                  ></label
+                >
+              </div>
+
+              <div class="payment-panel" data-payment-panel="paypal">
+                <p>
+                  An administrator will provide the PayPal receiving account
+                  and unique reference for this order. Payment happens outside
+                  this website.
+                </p>
+              </div>
+              <div class="payment-panel" data-payment-panel="cash-app" hidden>
+                <p>
+                  Cash App payments remain pending until an authorised
+                  administrator verifies receipt in the business account.
+                </p>
+              </div>
+              <div class="payment-panel" data-payment-panel="chime" hidden>
+                <p>
+                  Chime payments remain pending until an authorised
+                  administrator verifies receipt in the business account.
+                </p>
+              </div>
+              <div
+                class="payment-panel"
+                data-payment-panel="bank-transfer"
+                hidden
+              >
+                <p>
+                  Bank-transfer details are assigned for this order and remain
+                  pending until an administrator verifies the receiving account.
+                </p>
+              </div>
+              <div class="payment-panel" data-payment-panel="gift-card" hidden>
+                <p>
+                  Gift-card instructions are assigned for this order and remain
+                  pending until an authorised administrator verifies receipt.
+                </p>
+              </div>
+            </section>
+
+            <label class="terms-check"
+              ><input type="checkbox" name="accept-terms" required /><span
+                >I agree to the
+                <a href="#terms" data-route="terms">Terms of Service</a>, refund
+                policy and ticket conditions.</span
+              ></label
+            >
+            <button class="button button-primary button-full" type="submit">
+              Submit order request
+            </button>
+            <p class="secure-note">Secure order and manual payment review</p>
+          </form>
+
+          <aside
+            class="checkout-summary"
+            aria-labelledby="checkout-summary-title"
+          >
+            <h2 id="checkout-summary-title">Order summary</h2>
+            <div class="summary-event">
+              <img
+                src="upload/01-1000193436.jpg"
+                alt="Matt Rife event artwork"
+              />
+              <div>
+                <strong>Matt Rife — Live</strong
+                ><span>Fri, Sep 4 • 8:00 PM</span><span>Mohegan Sun Arena</span>
+              </div>
+            </div>
+            <div class="selected-seat">
+              <strong>Section 113</strong><span>2 tickets requested</span>
+            </div>
+            <dl class="summary-lines">
+              <div>
+                <dt>Tickets</dt>
+                <dd>2 × $134.00</dd>
+              </div>
+              <div>
+                <dt>Fees</dt>
+                <dd>Included</dd>
+              </div>
+              <div class="summary-total">
+                <dt>Total</dt>
+                <dd>USD $268.00</dd>
+              </div>
+            </dl>
+            <button class="text-link" type="button" data-route="event-details">
+              Change tickets
+            </button>
+          </aside>
+        </div>
+      </section>
+
+      <!-- MEMBERSHIP PAGE -->
+      <section
+        class="page"
+        id="page-membership"
+        data-page="membership"
+        aria-labelledby="membership-title"
+        hidden
+      >
+        <div class="page-hero membership-hero">
+          <div class="container">
+            <p class="eyebrow">JOIN THE COMMUNITY</p>
+            <h1 id="membership-title">Join the inner circle</h1>
+            <p>
+              Apply for membership updates, community news and selected
+              non-ticket experiences.
+            </p>
+            <button
+              class="button button-primary"
+              type="button"
+              data-action="scroll-to-application"
+            >
+              Apply for membership
+            </button>
+          </div>
+        </div>
+
+        <div class="container page-content">
+          <section aria-labelledby="benefits-title">
+            <div class="section-heading centered">
+              <div>
+                <p class="eyebrow">MEMBER BENEFITS</p>
+                <h2 id="benefits-title">Your access starts here</h2>
+              </div>
+            </div>
+            <div class="benefit-grid">
+              <article>
+                <span class="benefit-number">01</span>
+                <h3>Community updates</h3>
+                <p>Receive news and approved membership announcements.</p>
+              </article>
+              <article>
+                <span class="benefit-number">02</span>
+                <h3>Exclusive content</h3>
+                <p>
+                  Receive members-only updates, behind-the-scenes content and
+                  special releases.
+                </p>
+              </article>
+              <article>
+                <span class="benefit-number">03</span>
+                <h3>Selected experiences</h3>
+                <p>Hear about approved non-ticket community experiences.</p>
+              </article>
+            </div>
+          </section>
+
+          <section
+            class="application-section"
+            id="membership-application"
+            aria-labelledby="application-title"
+          >
+            <div class="application-intro">
+              <p class="eyebrow">APPLICATION</p>
+              <h2 id="application-title">Tell us about yourself</h2>
+              <p>
+                Complete the form below. Our team will review your application
+                and contact you by email.
+              </p>
+            </div>
+            <form class="application-form form-card" id="membership-form">
+              <div class="form-grid">
+                <label
+                  ><span>First name</span
+                  ><input
+                    type="text"
+                    name="member-first-name"
+                    autocomplete="given-name"
+                    required
+                /></label>
+                <label
+                  ><span>Last name</span
+                  ><input
+                    type="text"
+                    name="member-last-name"
+                    autocomplete="family-name"
+                    required
+                /></label>
+                <label class="full-width"
+                  ><span>Email address</span
+                  ><input
+                    type="email"
+                    name="member-email"
+                    autocomplete="email"
+                    required
+                /></label>
+                <label
+                  ><span>Phone number</span
+                  ><input
+                    type="tel"
+                    name="member-phone"
+                    autocomplete="tel"
+                    required
+                /></label>
+                <label
+                  ><span>Country</span
+                  ><select name="member-country" required>
+                    <option value="">Select country</option>
+                    <option>United States</option>
+                    <option>United Kingdom</option>
+                    <option>Canada</option>
+                    <option>Australia</option>
+                    <option>Nigeria</option>
+                    <option value="OTHER">Other</option>
+                  </select></label
+                >
+                <label class="full-width" data-other-country-field hidden
+                  ><span>Enter your country</span
+                  ><input type="text" name="member-country-name" /></label>
+                <label class="full-width"
+                  ><span>Why would you like to become a member?</span
+                  ><textarea
+                    name="membership-reason"
+                    rows="5"
+                    required
+                    placeholder="Tell us briefly..."
+                  ></textarea>
+                </label>
+                <label class="full-width"
+                  ><span>Which experiences interest you?</span
+                  ><select name="membership-interest" required>
+                    <option value="">Select an option</option>
+                    <option value="exclusive_content">Exclusive content</option>
+                    <option value="meet_and_greet">
+                      Meet-and-greet opportunities
+                    </option>
+                    <option value="merchandise">Merchandise</option>
+                    <option value="general_membership">
+                      General membership updates
+                    </option>
+                  </select></label
+                >
+              </div>
+              <label class="terms-check"
+                ><input
+                  type="checkbox"
+                  name="membership-consent"
+                  required
+                /><span
+                  >I agree to receive membership updates and accept the privacy
+                  policy.</span
+                ></label
+              >
+              <button class="button button-primary button-full" type="submit">
+                Submit application
+              </button>
+            </form>
+          </section>
+        </div>
+      </section>
+
+      <!-- SERVICES PAGE -->
+      <section
+        class="page"
+        id="page-services"
+        data-page="services"
+        aria-labelledby="services-title"
+        hidden
+      >
+        <div class="page-hero compact-hero">
+          <div class="container">
+            <p class="eyebrow">MORE WAYS TO CONNECT</p>
+            <h1 id="services-title">Services & experiences</h1>
+            <p>Explore available bookings, appearances and special requests.</p>
+          </div>
+        </div>
+        <div class="container page-content">
+          <div class="service-grid">
+            <article class="service-card">
+              <span class="service-label">PRIVATE</span>
+              <h2>Private event enquiry</h2>
+              <p>
+                Request information for private events, corporate engagements
+                and approved appearances.
+              </p>
+              <button
+                class="button button-outline"
+                type="button"
+                data-action="open-service-form"
+                data-service="Private event enquiry"
+              >
+                Enquire now
+              </button>
+            </article>
+            <article class="service-card">
+              <span class="service-label">PREMIUM</span>
+              <h2>Meet-and-greet request</h2>
+              <p>
+                Register your interest in meet-and-greet opportunities attached
+                to selected shows.
+              </p>
+              <button
+                class="button button-outline"
+                type="button"
+                data-action="open-service-form"
+                data-service="Meet-and-greet request"
+              >
+                Register interest
+              </button>
+            </article>
+            <article class="service-card">
+              <span class="service-label">SUPPORT</span>
+              <h2>Ticket assistance</h2>
+              <p>
+                Get help with an existing order, ticket delivery or event
+                information.
+              </p>
+              <button
+                class="button button-outline"
+                type="button"
+                data-route="support"
+              >
+                Get support
+              </button>
+            </article>
+          </div>
+
+          <section
+            class="service-enquiry form-card"
+            id="service-enquiry"
+            aria-labelledby="service-enquiry-title"
+            hidden
+          >
+            <div class="section-heading compact">
+              <div>
+                <p class="eyebrow">ENQUIRY</p>
+                <h2 id="service-enquiry-title">Send your request</h2>
+              </div>
+              <button
+                class="icon-button"
+                type="button"
+                data-action="close-service-form"
+                aria-label="Close form"
+              >
+                ×
+              </button>
+            </div>
+            <form id="service-form">
+              <input type="hidden" name="service-type" id="service-type" />
+              <div class="form-grid">
+                <label
+                  ><span>Full name</span
+                  ><input type="text" name="service-name" required
+                /></label>
+                <label
+                  ><span>Email address</span
+                  ><input type="email" name="service-email" required
+                /></label>
+                <label class="full-width"
+                  ><span>Organisation (optional)</span
+                  ><input type="text" name="organisation"
+                /></label>
+                <label class="full-width"
+                  ><span>Tell us what you need</span
+                  ><textarea
+                    name="service-message"
+                    rows="6"
+                    required
+                  ></textarea>
+                </label>
+              </div>
+              <button class="button button-primary" type="submit">
+                Send enquiry
+              </button>
+            </form>
+          </section>
+        </div>
+      </section>
+
+      <!-- ACCOUNT PAGE -->
+      <section
+        class="page"
+        id="page-account"
+        data-page="account"
+        aria-labelledby="account-title"
+        hidden
+      >
+        <div class="container account-layout">
+          <div class="account-intro">
+            <p class="eyebrow">WELCOME BACK</p>
+            <h1 id="account-title">Your live experiences, all together.</h1>
+            <p>
+              Sign in to view order and payment status, check applications and
+              manage your details.
+            </p>
+          </div>
+          <div class="auth-card form-card">
+            <div class="auth-tabs" role="tablist" aria-label="Account options">
+              <button
+                type="button"
+                role="tab"
+                aria-selected="true"
+                aria-controls="login-panel"
+                id="login-tab"
+                data-auth-tab="login"
+              >
+                Sign in
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected="false"
+                aria-controls="register-panel"
+                id="register-tab"
+                data-auth-tab="register"
+              >
+                Create account
+              </button>
+            </div>
+            <form id="login-panel" role="tabpanel" aria-labelledby="login-tab">
+              <label
+                ><span>Email address</span
+                ><input
+                  type="email"
+                  name="login-email"
+                  autocomplete="email"
+                  required
+              /></label>
+              <label
+                ><span>Password</span
+                ><input
+                  type="password"
+                  name="login-password"
+                  autocomplete="current-password"
+                  required
+              /></label>
+              <div class="form-row">
+                <label class="remember-check"
+                  ><input type="checkbox" name="remember" /><span
+                    >Remember me</span
+                  ></label
+                ><button
+                  class="text-link"
+                  type="button"
+                  data-action="forgot-password"
+                >
+                  Forgot password?
+                </button>
+              </div>
+              <button class="button button-primary button-full" type="submit">
+                Sign in
+              </button>
+            </form>
+            <form
+              id="register-panel"
+              role="tabpanel"
+              aria-labelledby="register-tab"
+              hidden
+            >
+              <label
+                ><span>Full name</span
+                ><input
+                  type="text"
+                  name="register-name"
+                  autocomplete="name"
+                  required
+              /></label>
+              <label
+                ><span>Email address</span
+                ><input
+                  type="email"
+                  name="register-email"
+                  autocomplete="email"
+                  required
+              /></label>
+              <label
+                ><span>Password</span
+                ><input
+                  type="password"
+                  name="register-password"
+                  autocomplete="new-password"
+                  minlength="8"
+                  pattern="(?=.*[A-Za-z])(?=.*[0-9]).{8,}"
+                  title="Use at least 8 characters, including a letter and a number."
+                  required
+              /></label>
+              <label class="terms-check"
+                ><input type="checkbox" required /><span
+                  >I agree to the Terms of Service and Privacy Policy.</span
+                ></label
+              >
+              <button class="button button-primary button-full" type="submit">
+                Create account
+              </button>
+            </form>
+          </div>
+          <section
+            class="auth-card form-card"
+            id="account-status"
+            aria-labelledby="account-status-title"
+            hidden
+          >
+            <h2 id="account-status-title">Your order requests</h2>
+            <div id="account-order-list" aria-live="polite"></div>
+            <button
+              class="button button-outline button-full"
+              type="button"
+              data-action="customer-logout"
+            >
+              Sign out
+            </button>
+          </section>
+        </div>
+      </section>
+
+      <!-- SUPPORT PAGE -->
+      <section
+        class="page"
+        id="page-support"
+        data-page="support"
+        aria-labelledby="support-title"
+        hidden
+      >
+        <div class="page-hero compact-hero">
+          <div class="container">
+            <p class="eyebrow">WE'RE HERE TO HELP</p>
+            <h1 id="support-title">How can we help?</h1>
+            <p>Find quick answers or send our support team a message.</p>
+          </div>
+        </div>
+        <div class="container page-content support-layout">
+          <section aria-labelledby="faq-title">
+            <h2 id="faq-title">Frequently asked questions</h2>
+            <div class="accordion">
+              <details>
+                <summary>What happens after payment?</summary>
+                <p>
+                  After payment verification, fulfilment information will be
+                  provided separately. No ticket is generated or delivered
+                  during this ordering phase.
+                </p>
+              </details>
+              <details>
+                <summary>Can I change or cancel my order?</summary>
+                <p>
+                  Cancellation and exchange eligibility depends on the event
+                  terms shown during checkout.
+                </p>
+              </details>
+              <details>
+                <summary>How long does payment verification take?</summary>
+                <p>
+                  Every payment is reviewed manually after you submit the
+                  requested payment proof. Review time depends on when the
+                  receiving account can be checked.
+                </p>
+              </details>
+              <details>
+                <summary>How do membership applications work?</summary>
+                <p>
+                  Submit the membership form and our team will review it. You
+                  will receive the decision and next steps by email.
+                </p>
+              </details>
+            </div>
+          </section>
+          <form class="support-form form-card" id="support-form">
+            <h2>Contact support</h2>
+            <label
+              ><span>Name</span
+              ><input type="text" name="support-name" required /></label
+            ><label
+              ><span>Email</span
+              ><input type="email" name="support-email" required /></label
+            ><label
+              ><span>Order number (optional)</span
+              ><input type="text" name="order-number" /></label
+            ><label
+              ><span>Message</span
+              ><textarea
+                name="support-message"
+                rows="6"
+                required
+              ></textarea></label
+            ><button class="button button-primary button-full" type="submit">
+              Send message
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- TERMS PAGE -->
+      <section
+        class="page"
+        id="page-terms"
+        data-page="terms"
+        aria-labelledby="terms-title"
+        hidden
+      >
+        <div class="container legal-page">
+          <p class="eyebrow">LEGAL</p>
+          <h1 id="terms-title">Terms of Service</h1>
+          <p class="legal-updated">Last updated: September 2026</p>
+          <article>
+            <h2>Ticket purchases</h2>
+            <p>
+              Ticket availability and pricing may change until an order has been
+              completed and payment confirmed.
+            </p>
+            <h2>Payments</h2>
+            <p>
+              Payment details are assigned to your authenticated account for a
+              specific order. Transfer only the exact amount to the displayed
+              recipient before the instructions expire.
+            </p>
+            <h2>Fulfilment</h2>
+            <p>
+              Payment confirmation does not mean a ticket has been generated or
+              delivered. Fulfilment information will be provided separately.
+            </p>
+            <h2>Refunds and event changes</h2>
+            <p>
+              Refund, cancellation and rescheduling conditions depend on the
+              event and will be presented before purchase.
+            </p>
+            <h2>Membership applications</h2>
+            <p>
+              Submitting an application does not guarantee approval. Applicants
+              will be contacted using the details they provide.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <!-- SUCCESS PAGE -->
+      <section
+        class="page"
+        id="page-success"
+        data-page="success"
+        aria-labelledby="success-title"
+        hidden
+      >
+        <div class="container success-card" aria-live="polite">
+          <div class="success-icon" aria-hidden="true">✓</div>
+          <p class="eyebrow">ORDER RECEIVED</p>
+          <h1 id="success-title">Payment verification pending</h1>
+          <p id="payment-status-message">
+            Your order has been received and is awaiting payment verification.
+          </p>
+          <div class="confirmation-details">
+            <div>
+              <span>Order reference</span
+              ><strong id="order-number">Pending</strong>
+            </div>
+            <div>
+              <span>Payment status</span
+              ><strong id="confirmation-payment-status">Pending</strong>
+            </div>
+          </div>
+          <div class="success-actions">
+            <button
+              class="button button-primary"
+              type="button"
+              data-route="account"
+            >
+              View order status</button
+            ><button
+              class="button button-outline"
+              type="button"
+              data-route="home"
+            >
+              Return home
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-grid">
+        <div>
+          <a class="brand footer-brand" href="#home" data-route="home"
+            ><span class="brand-mark" aria-hidden="true">M</span
+            ><span class="brand-name">LIVE</span></a
+          >
+          <p>
+            Official tickets, exclusive membership and unforgettable live
+            experiences.
+          </p>
+        </div>
+        <div>
+          <h2>Explore</h2>
+          <a href="#events" data-route="events">Events</a
+          ><a href="#membership" data-route="membership">Membership</a
+          ><a href="#services" data-route="services">Services</a>
+        </div>
+        <div>
+          <h2>Help</h2>
+          <a href="#support" data-route="support">Support</a
+          ><a href="#terms" data-route="terms">Terms</a
+          ><a href="#privacy">Privacy</a>
+        </div>
+        <div>
+          <h2>Stay updated</h2>
+          <form class="newsletter-form" id="newsletter-form">
+            <label
+              ><span class="sr-only">Email address</span
+              ><input
+                type="email"
+                name="newsletter-email"
+                placeholder="Email address"
+                required /></label
+            ><button class="button button-primary button-small" type="submit">
+              Join
+            </button>
+          </form>
+        </div>
+      </div>
+      <div class="container footer-bottom">
+        <p>
+          © <span id="current-year">2026</span> Live Events. All rights
+          reserved.
+        </p>
+        <p>Designed for unforgettable moments.</p>
+      </div>
+    </footer>
+
+    <div
+      class="search-dialog"
+      id="search-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="search-dialog-title"
+      hidden
+    >
+      <div class="dialog-backdrop" data-action="close-search"></div>
+      <div class="dialog-panel">
+        <button
+          class="dialog-close"
+          type="button"
+          data-action="close-search"
+          aria-label="Close search"
+        >
+          ×
+        </button>
+        <p class="eyebrow">FIND AN EVENT</p>
+        <h2 id="search-dialog-title">What are you looking for?</h2>
+        <form id="global-search-form">
+          <label
+            ><span class="sr-only">Search events</span
+            ><input
+              type="search"
+              name="global-search"
+              placeholder="Artist, venue or city"
+              required
+              autofocus /></label
+          ><button class="button button-primary" type="submit">Search</button>
+        </form>
+      </div>
+    </div>
+
+    <div
+      class="toast-region"
+      id="toast-region"
+      aria-live="polite"
+      aria-atomic="true"
+    ></div>
+    <script src="script.js" defer></script>
+  </body>
+</html>

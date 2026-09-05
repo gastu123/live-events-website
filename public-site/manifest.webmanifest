@@ -1,0 +1,22 @@
+{
+  "name": "Live Events",
+  "short_name": "Live Events",
+  "description": "Discover live events, purchase verified tickets and apply for exclusive membership.",
+  "start_url": "./#home",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#070707",
+  "theme_color": "#070707",
+  "icons": [
+    {
+      "src": "assets/public-icons/live-events-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/public-icons/live-events-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

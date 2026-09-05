@@ -1,0 +1,1787 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#070707" />
+    <meta name="robots" content="noindex, nofollow, noarchive" />
+    <meta name="admin-api-base-url" content="__ADMIN_API_BASE_URL__" />
+    <meta
+      name="description"
+      content="Private administration dashboard for events, tickets and memberships."
+    />
+    <title>Admin Dashboard | Live Events</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="manifest" href="admin-manifest.json" />
+    <link
+      rel="icon"
+      href="assets/admin-icons/admin-icon-192.png"
+      sizes="192x192"
+    />
+    <link rel="apple-touch-icon" href="assets/admin-icons/admin-icon-192.png" />
+    <link rel="stylesheet" href="admin.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#admin-main">Skip to dashboard content</a>
+
+    <!-- The login screen is shown until secure backend authentication succeeds. -->
+    <section
+      class="admin-login"
+      id="admin-login"
+      aria-labelledby="admin-login-title"
+    >
+      <div class="login-glow" aria-hidden="true"></div>
+      <div class="login-card">
+        <a class="admin-brand" href="#" aria-label="Admin portal">
+          <span class="brand-mark" aria-hidden="true">M</span>
+          <span><strong>LIVE</strong><small>PRIVATE ADMIN</small></span>
+        </a>
+        <p class="eyebrow">AUTHORIZED ACCESS ONLY</p>
+        <h1 id="admin-login-title">Welcome back</h1>
+        <p class="login-copy">
+          Sign in to manage events, orders, members and customer requests.
+        </p>
+        <div id="development-demo-login" class="demo-login-notice" hidden></div>
+        <form id="admin-login-form">
+          <label
+            ><span>Email address</span
+            ><input
+              type="email"
+              name="admin-email"
+              autocomplete="username"
+              required
+              placeholder="admin@example.com"
+          /></label>
+          <label
+            ><span>Password</span
+            ><span class="password-field"
+              ><input
+                type="password"
+                name="admin-password"
+                autocomplete="current-password"
+                required
+                minlength="8"
+              /><button
+                type="button"
+                data-action="toggle-password"
+                aria-label="Show password"
+              >
+                Show
+              </button></span
+            ></label
+          >
+          <div class="login-options">
+            <label class="check-label"
+              ><input type="checkbox" name="remember-device" /><span
+                >Trust this device</span
+              ></label
+            ><button
+              class="text-button"
+              type="button"
+              data-action="forgot-admin-password"
+            >
+              Forgot password?
+            </button>
+          </div>
+          <button class="primary-button full-button" type="submit">
+            Secure sign in
+          </button>
+        </form>
+        <p class="security-note">
+          Protected area • Activity is monitored and recorded
+        </p>
+      </div>
+    </section>
+
+    <!-- The authenticated dashboard shell. JavaScript displays this after sign-in. -->
+    <div class="admin-app" id="admin-app" hidden>
+      <aside
+        class="admin-sidebar"
+        id="admin-sidebar"
+        aria-label="Administration navigation"
+      >
+        <div class="sidebar-head">
+          <a class="admin-brand" href="#overview" data-admin-route="overview">
+            <span class="brand-mark" aria-hidden="true">M</span>
+            <span><strong>LIVE</strong><small>ADMIN</small></span>
+          </a>
+          <button
+            class="icon-button close-sidebar"
+            type="button"
+            data-action="close-sidebar"
+            aria-label="Close menu"
+          >
+            ×
+          </button>
+        </div>
+
+        <nav class="sidebar-nav">
+          <p class="nav-label">Workspace</p>
+          <a
+            href="#overview"
+            class="sidebar-link is-active"
+            data-admin-route="overview"
+            ><span class="nav-icon" aria-hidden="true">◫</span
+            ><span>Overview</span></a
+          >
+          <a href="#orders" class="sidebar-link" data-admin-route="orders"
+            ><span class="nav-icon" aria-hidden="true">▤</span
+            ><span>Orders</span><span class="nav-count" id="nav-pending-orders" hidden></span></a
+          >
+          <a href="#tickets" class="sidebar-link" data-admin-route="tickets"
+            ><span class="nav-icon" aria-hidden="true">▥</span
+            ><span>Ticket inventory</span></a
+          >
+          <a href="#events" class="sidebar-link" data-admin-route="events"
+            ><span class="nav-icon" aria-hidden="true">◇</span
+            ><span>Events</span></a
+          >
+          <a href="#members" class="sidebar-link" data-admin-route="members"
+            ><span class="nav-icon" aria-hidden="true">◎</span
+            ><span>Members</span></a
+          >
+          <a
+            href="#applications"
+            class="sidebar-link"
+            data-admin-route="applications"
+            ><span class="nav-icon" aria-hidden="true">◉</span
+            ><span>Applications</span><span class="nav-count alert" id="nav-pending-applications" hidden></span></a
+          >
+
+          <p class="nav-label">Operations</p>
+          <a href="#payments" class="sidebar-link" data-admin-route="payments"
+            ><span class="nav-icon" aria-hidden="true">▣</span
+            ><span>Payments</span><span class="nav-count alert" id="nav-pending-payments" hidden></span></a
+          >
+          <a href="#services" class="sidebar-link" data-admin-route="services"
+            ><span class="nav-icon" aria-hidden="true">◆</span
+            ><span>Service requests</span></a
+          >
+
+          <p class="nav-label">System</p>
+          <a href="#team" class="sidebar-link" data-admin-route="team"
+            ><span class="nav-icon" aria-hidden="true">◈</span
+            ><span>Admin team</span></a
+          >
+          <a href="#audit" class="sidebar-link" data-admin-route="audit"
+            ><span class="nav-icon" aria-hidden="true">≡</span
+            ><span>Audit log</span></a
+          >
+          <a href="#settings" class="sidebar-link" data-admin-route="settings"
+            ><span class="nav-icon" aria-hidden="true">⚙</span
+            ><span>Settings</span></a
+          >
+        </nav>
+
+        <div class="sidebar-profile">
+          <span class="avatar" aria-hidden="true">LA</span>
+          <span
+            ><strong>Lead Admin</strong><small>Super administrator</small></span
+          >
+          <button
+            class="icon-button"
+            type="button"
+            data-action="admin-logout"
+            aria-label="Sign out"
+          >
+            ↪
+          </button>
+        </div>
+      </aside>
+
+      <div class="sidebar-backdrop" data-action="close-sidebar" hidden></div>
+
+      <div class="admin-workspace">
+        <header class="admin-topbar">
+          <div class="topbar-left">
+            <button
+              class="icon-button menu-trigger"
+              type="button"
+              data-action="open-sidebar"
+              aria-label="Open menu"
+            >
+              ☰
+            </button>
+            <div>
+              <p class="topbar-kicker">ADMIN CONSOLE</p>
+              <h1 id="current-page-title">Overview</h1>
+            </div>
+          </div>
+          <div class="topbar-actions">
+            <label class="topbar-search"
+              ><span class="sr-only">Search dashboard</span
+              ><input
+                type="search"
+                id="admin-global-search"
+                placeholder="Search orders, members..."
+              /><span aria-hidden="true">⌕</span></label
+            >
+            <button
+              class="icon-button notification-button"
+              type="button"
+              data-action="notifications"
+              aria-label="Notifications"
+            >
+              <span aria-hidden="true">◉</span
+              ><span class="notification-dot"></span>
+            </button>
+            <button
+              class="secondary-button install-button"
+              id="install-admin-app"
+              type="button"
+              hidden
+            >
+              Install app
+            </button>
+            <button
+              class="primary-button create-button"
+              type="button"
+              data-action="create-event"
+            >
+              + New event
+            </button>
+          </div>
+        </header>
+
+        <main class="admin-main" id="admin-main">
+          <!-- OVERVIEW -->
+          <section
+            class="admin-page is-active"
+            data-admin-page="overview"
+            aria-labelledby="overview-title"
+          >
+            <div class="welcome-row">
+              <div>
+                <p class="eyebrow">LIVE BUSINESS SNAPSHOT</p>
+                <h2 id="overview-title">Good day, Admin.</h2>
+                <p>Here is what is happening across your platform.</p>
+              </div>
+              <div class="date-range">
+                <button
+                  class="secondary-button"
+                  type="button"
+                  data-action="change-date-range"
+                >
+                  Last 30 days⌄</button
+                ><button
+                  class="icon-button"
+                  type="button"
+                  data-action="refresh-dashboard"
+                  aria-label="Refresh dashboard"
+                >
+                  ↻
+                </button>
+              </div>
+            </div>
+
+            <div class="metric-grid">
+              <article class="metric-card featured">
+                <div class="metric-head">
+                  <span>Gross sales</span><span class="metric-icon">$</span>
+                </div>
+                <strong>$84,620</strong>
+                <p>
+                  <span class="trend up">↑ 18.4%</span> from previous period
+                </p>
+                <div class="mini-bars" aria-hidden="true">
+                  <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+                </div>
+              </article>
+              <article class="metric-card">
+                <div class="metric-head">
+                  <span>Tickets sold</span><span class="metric-icon">▥</span>
+                </div>
+                <strong>642</strong>
+                <p>
+                  <span class="trend up">↑ 12.8%</span> from previous period
+                </p>
+              </article>
+              <article class="metric-card">
+                <div class="metric-head">
+                  <span>Active members</span><span class="metric-icon">◎</span>
+                </div>
+                <strong>1,284</strong>
+                <p><span class="trend up">↑ 7.2%</span> this month</p>
+              </article>
+              <article class="metric-card">
+                <div class="metric-head">
+                  <span>Pending reviews</span><span class="metric-icon">◉</span>
+                </div>
+                <strong>13</strong>
+                <p><span class="trend warning">Needs attention</span></p>
+              </article>
+            </div>
+
+            <div class="dashboard-grid">
+              <section
+                class="panel sales-panel"
+                aria-labelledby="sales-chart-title"
+              >
+                <div class="panel-head">
+                  <div>
+                    <p class="panel-kicker">REVENUE</p>
+                    <h3 id="sales-chart-title">Sales performance</h3>
+                  </div>
+                  <select aria-label="Sales chart period">
+                    <option>Last 7 days</option>
+                    <option>Last 30 days</option>
+                    <option>Last 12 months</option>
+                  </select>
+                </div>
+                <div class="chart-summary">
+                  <strong>$21,480</strong
+                  ><span><i class="legend-dot ticket-dot"></i>Ticket sales</span
+                  ><span><i class="legend-dot member-dot"></i>Membership</span>
+                </div>
+                <div
+                  class="bar-chart"
+                  role="img"
+                  aria-label="Ticket and membership sales chart for seven days"
+                >
+                  <div class="chart-column">
+                    <span
+                      ><i style="height: 52%"></i
+                      ><b style="height: 23%"></b></span
+                    ><small>Mon</small>
+                  </div>
+                  <div class="chart-column">
+                    <span
+                      ><i style="height: 66%"></i
+                      ><b style="height: 30%"></b></span
+                    ><small>Tue</small>
+                  </div>
+                  <div class="chart-column">
+                    <span
+                      ><i style="height: 47%"></i
+                      ><b style="height: 35%"></b></span
+                    ><small>Wed</small>
+                  </div>
+                  <div class="chart-column">
+                    <span
+                      ><i style="height: 78%"></i
+                      ><b style="height: 28%"></b></span
+                    ><small>Thu</small>
+                  </div>
+                  <div class="chart-column">
+                    <span
+                      ><i style="height: 92%"></i
+                      ><b style="height: 42%"></b></span
+                    ><small>Fri</small>
+                  </div>
+                  <div class="chart-column">
+                    <span
+                      ><i style="height: 73%"></i
+                      ><b style="height: 38%"></b></span
+                    ><small>Sat</small>
+                  </div>
+                  <div class="chart-column">
+                    <span
+                      ><i style="height: 60%"></i
+                      ><b style="height: 25%"></b></span
+                    ><small>Sun</small>
+                  </div>
+                </div>
+              </section>
+
+              <section
+                class="panel activity-panel"
+                aria-labelledby="activity-title"
+              >
+                <div class="panel-head">
+                  <div>
+                    <p class="panel-kicker">LIVE FEED</p>
+                    <h3 id="activity-title">Recent activity</h3>
+                  </div>
+                  <button
+                    class="text-button"
+                    type="button"
+                    data-admin-route="audit"
+                  >
+                    View all
+                  </button>
+                </div>
+                <ol class="activity-list">
+                  <li>
+                    <span class="activity-icon sale">$</span>
+                    <div>
+                      <strong>New ticket order</strong>
+                      <p>Emily Carter purchased 2 tickets</p>
+                      <small>2 minutes ago</small>
+                    </div>
+                    <b>$268</b>
+                  </li>
+                  <li>
+                    <span class="activity-icon member">◎</span>
+                    <div>
+                      <strong>Membership approved</strong>
+                      <p>Daniel Brooks is now an active member</p>
+                      <small>18 minutes ago</small>
+                    </div>
+                  </li>
+                  <li>
+                    <span class="activity-icon pending">◉</span>
+                    <div>
+                      <strong>Payment awaiting review</strong>
+                      <p>Order #LIVE-834291 • Cash App</p>
+                      <small>31 minutes ago</small>
+                    </div>
+                  </li>
+                </ol>
+              </section>
+            </div>
+
+            <section class="panel" aria-labelledby="recent-orders-title">
+              <div class="panel-head">
+                <div>
+                  <p class="panel-kicker">LATEST SALES</p>
+                  <h3 id="recent-orders-title">Recent orders</h3>
+                </div>
+                <button
+                  class="text-button"
+                  type="button"
+                  data-admin-route="orders"
+                >
+                  View all orders
+                </button>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Order</th>
+                      <th>Customer</th>
+                      <th>Event</th>
+                      <th>Tickets</th>
+                      <th>Payment</th>
+                      <th>Total</th>
+                      <th>Status</th>
+                      <th><span class="sr-only">Actions</span></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>
+                        <strong>#LIVE-834296</strong
+                        ><small>Sep 3, 2:41 PM</small>
+                      </td>
+                      <td>Emily Carter<small>emily@example.com</small></td>
+                      <td>Matt Rife — Live</td>
+                      <td>2</td>
+                      <td>PayPal</td>
+                      <td><strong>$268.00</strong></td>
+                      <td><span class="status success">Paid</span></td>
+                      <td>
+                        <button
+                          class="row-menu"
+                          type="button"
+                          data-action="row-menu"
+                          aria-label="Order actions"
+                        >
+                          •••
+                        </button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <strong>#LIVE-834295</strong
+                        ><small>Sep 3, 2:17 PM</small>
+                      </td>
+                      <td>James Wilson<small>james@example.com</small></td>
+                      <td>New York Live</td>
+                      <td>1</td>
+                      <td>Card</td>
+                      <td><strong>$98.00</strong></td>
+                      <td><span class="status success">Paid</span></td>
+                      <td>
+                        <button
+                          class="row-menu"
+                          type="button"
+                          data-action="row-menu"
+                          aria-label="Order actions"
+                        >
+                          •••
+                        </button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <strong>#LIVE-834294</strong
+                        ><small>Sep 3, 1:58 PM</small>
+                      </td>
+                      <td>Sophia Brown<small>sophia@example.com</small></td>
+                      <td>Matt Rife — Live</td>
+                      <td>2</td>
+                      <td>Cash App</td>
+                      <td><strong>$268.00</strong></td>
+                      <td><span class="status pending">Review</span></td>
+                      <td>
+                        <button
+                          class="row-menu"
+                          type="button"
+                          data-action="row-menu"
+                          aria-label="Order actions"
+                        >
+                          •••
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </section>
+
+          <!-- ORDERS -->
+          <section
+            class="admin-page"
+            data-admin-page="orders"
+            aria-labelledby="orders-title"
+            hidden
+          >
+            <div class="page-heading">
+              <div>
+                <p class="eyebrow">SALES MANAGEMENT</p>
+                <h2 id="orders-title">Orders</h2>
+                <p>
+                  Review order requests, quantities, sections, prices and
+                  payment status.
+                </p>
+              </div>
+              <button
+                class="secondary-button"
+                type="button"
+                data-action="export-orders"
+              >
+                Export CSV
+              </button>
+            </div>
+            <div class="toolbar">
+              <label class="toolbar-search"
+                ><span class="sr-only">Search orders</span
+                ><input
+                  type="search"
+                  data-table-search="orders-table"
+                  placeholder="Search order, customer or email" /></label
+              ><select data-table-filter="orders-table" data-filter-column="6">
+                <option value="">All statuses</option>
+                <option>Paid</option>
+                <option>Review</option>
+                <option>Refunded</option>
+                <option>Cancelled</option></select
+              ><select>
+                <option>All payment methods</option>
+                <option>Card</option>
+                <option>PayPal</option>
+                <option>Cash App</option>
+                <option>Chime</option>
+                <option>Gift Card</option>
+                </select
+              ><button
+                class="secondary-button"
+                type="button"
+                data-action="filter-date"
+              >
+                Date range
+              </button>
+            </div>
+            <section class="panel table-panel">
+              <div class="table-wrap">
+                <table id="orders-table">
+                  <thead>
+                    <tr>
+                      <th>
+                        <input type="checkbox" aria-label="Select all orders" />
+                      </th>
+                      <th>Order</th>
+                      <th>Customer</th>
+                      <th>Event</th>
+                      <th>Tickets</th>
+                      <th>Payment</th>
+                      <th>Status</th>
+                      <th>Total</th>
+                      <th><span class="sr-only">Actions</span></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>
+                        <input
+                          type="checkbox"
+                          aria-label="Select order LIVE-834296"
+                        />
+                      </td>
+                      <td>#LIVE-834296</td>
+                      <td>Emily Carter<small>emily@example.com</small></td>
+                      <td>Matt Rife — Live</td>
+                      <td>2</td>
+                      <td>PayPal</td>
+                      <td><span class="status success">Paid</span></td>
+                      <td>$268.00</td>
+                      <td>
+                        <button class="row-menu" data-action="view-order">
+                          View
+                        </button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <input
+                          type="checkbox"
+                          aria-label="Select order LIVE-834295"
+                        />
+                      </td>
+                      <td>#LIVE-834295</td>
+                      <td>James Wilson<small>james@example.com</small></td>
+                      <td>New York Live</td>
+                      <td>1</td>
+                      <td>Card</td>
+                      <td><span class="status success">Paid</span></td>
+                      <td>$98.00</td>
+                      <td>
+                        <button class="row-menu" data-action="view-order">
+                          View
+                        </button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <input
+                          type="checkbox"
+                          aria-label="Select order LIVE-834294"
+                        />
+                      </td>
+                      <td>#LIVE-834294</td>
+                      <td>Sophia Brown<small>sophia@example.com</small></td>
+                      <td>Matt Rife — Live</td>
+                      <td>2</td>
+                      <td>Cash App</td>
+                      <td><span class="status pending">Review</span></td>
+                      <td>$268.00</td>
+                      <td>
+                        <button class="row-menu" data-action="view-order">
+                          Review
+                        </button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <input
+                          type="checkbox"
+                          aria-label="Select order LIVE-834293"
+                        />
+                      </td>
+                      <td>#LIVE-834293</td>
+                      <td>Noah Davis<small>noah@example.com</small></td>
+                      <td>London Live</td>
+                      <td>3</td>
+                      <td>Chime</td>
+                      <td><span class="status pending">Review</span></td>
+                      <td>£276.00</td>
+                      <td>
+                        <button class="row-menu" data-action="view-order">
+                          Review
+                        </button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <input
+                          type="checkbox"
+                          aria-label="Select order LIVE-834292"
+                        />
+                      </td>
+                      <td>#LIVE-834292</td>
+                      <td>Olivia Taylor<small>olivia@example.com</small></td>
+                      <td>Los Angeles Live</td>
+                      <td>2</td>
+                      <td>Card</td>
+                      <td><span class="status refunded">Refunded</span></td>
+                      <td>$230.00</td>
+                      <td>
+                        <button class="row-menu" data-action="view-order">
+                          View
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="pagination">
+                <p>Showing 1–5 of 642 orders</p>
+                <div>
+                  <button type="button" disabled>Previous</button
+                  ><button type="button" class="is-current">1</button
+                  ><button type="button">2</button
+                  ><button type="button">3</button
+                  ><button type="button">Next</button>
+                </div>
+              </div>
+            </section>
+          </section>
+
+          <!-- TICKET INVENTORY (fulfilment intentionally excluded) -->
+          <section
+            class="admin-page"
+            data-admin-page="tickets"
+            aria-labelledby="tickets-title"
+            hidden
+          >
+            <div class="page-heading">
+              <div>
+                <p class="eyebrow">ORDER AVAILABILITY</p>
+                <h2 id="tickets-title">Ticket inventory</h2>
+                <p>
+                  View configured sections, prices, available quantities and
+                  active order holds. Ticket fulfilment is not enabled.
+                </p>
+              </div>
+            </div>
+            <div class="metric-grid compact">
+              <article class="metric-card">
+                <span>Configured capacity</span><strong>845</strong>
+              </article>
+              <article class="metric-card">
+                <span>Available</span><strong>203</strong>
+              </article>
+              <article class="metric-card">
+                <span>Active holds</span><strong>4</strong>
+              </article>
+              <article class="metric-card">
+                <span>Payment successful</span><strong>638</strong>
+              </article>
+            </div>
+            <div class="toolbar">
+              <input
+                type="search"
+                data-table-search="tickets-table"
+                placeholder="Search event or section"
+              /><select>
+                <option>All events</option>
+                <option>Matt Rife — Live</option>
+                <option>New York Live</option>
+                <option>London Live</option>
+              </select>
+            </div>
+            <section class="panel table-panel">
+              <div class="table-wrap">
+                <table id="tickets-table">
+                  <thead>
+                    <tr>
+                      <th>Event</th>
+                      <th>Section</th>
+                      <th>Price</th>
+                      <th>Capacity</th>
+                      <th>Held</th>
+                      <th>Available</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Matt Rife — Live</td>
+                      <td>Section 113</td>
+                      <td>$134.00</td>
+                      <td>300</td>
+                      <td>4</td>
+                      <td>72</td>
+                    </tr>
+                    <tr>
+                      <td>Matt Rife — Live</td>
+                      <td>Floor</td>
+                      <td>$185.00</td>
+                      <td>245</td>
+                      <td>0</td>
+                      <td>48</td>
+                    </tr>
+                    <tr>
+                      <td>New York Live</td>
+                      <td>General admission</td>
+                      <td>$98.00</td>
+                      <td>300</td>
+                      <td>0</td>
+                      <td>83</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </section>
+
+          <!-- EVENTS -->
+          <section
+            class="admin-page"
+            data-admin-page="events"
+            aria-labelledby="admin-events-title"
+            hidden
+          >
+            <div class="page-heading">
+              <div>
+                <p class="eyebrow">SHOW MANAGEMENT</p>
+                <h2 id="admin-events-title">Events</h2>
+                <p>Create shows, control inventory and monitor sales.</p>
+              </div>
+              <button
+                class="primary-button"
+                type="button"
+                data-action="create-event"
+              >
+                + Create event
+              </button>
+            </div>
+            <div class="admin-event-grid">
+              <article class="admin-event-card">
+                <div class="event-art red-stage">
+                  <span class="status success">On sale</span
+                  ><strong>SEP 04</strong>
+                </div>
+                <div class="admin-event-body">
+                  <p class="event-category">COMEDY</p>
+                  <h3>Matt Rife — Live</h3>
+                  <p>Mohegan Sun Arena • Connecticut</p>
+                  <div class="event-progress">
+                    <span><b>76%</b> sold</span
+                    ><progress value="76" max="100">76%</progress>
+                  </div>
+                  <dl>
+                    <div>
+                      <dt>Sold</dt>
+                      <dd>642</dd>
+                    </div>
+                    <div>
+                      <dt>Remaining</dt>
+                      <dd>203</dd>
+                    </div>
+                    <div>
+                      <dt>Revenue</dt>
+                      <dd>$84.6K</dd>
+                    </div>
+                  </dl>
+                  <div class="card-actions">
+                    <button class="secondary-button" data-action="edit-event">
+                      Manage</button
+                    ><button class="icon-button" data-action="row-menu">
+                      •••
+                    </button>
+                  </div>
+                </div>
+              </article>
+              <article class="admin-event-card">
+                <div class="event-art dark-stage">
+                  <span class="status draft">Draft</span><strong>SEP 12</strong>
+                </div>
+                <div class="admin-event-body">
+                  <p class="event-category">COMEDY</p>
+                  <h3>New York Live</h3>
+                  <p>Madison Square Garden • New York</p>
+                  <div class="event-progress">
+                    <span><b>Not published</b></span
+                    ><progress value="0" max="100">0%</progress>
+                  </div>
+                  <dl>
+                    <div>
+                      <dt>Capacity</dt>
+                      <dd>1,200</dd>
+                    </div>
+                    <div>
+                      <dt>Sections</dt>
+                      <dd>—</dd>
+                    </div>
+                    <div>
+                      <dt>Starting</dt>
+                      <dd>$98</dd>
+                    </div>
+                  </dl>
+                  <div class="card-actions">
+                    <button class="secondary-button" data-action="edit-event">
+                      Continue setup</button
+                    ><button class="icon-button" data-action="row-menu">
+                      •••
+                    </button>
+                  </div>
+                </div>
+              </article>
+              <button
+                class="add-event-card"
+                type="button"
+                data-action="create-event"
+              >
+                <span>+</span><strong>Create another event</strong
+                ><small>Add details, ticket sections and pricing</small>
+              </button>
+            </div>
+          </section>
+
+          <!-- MEMBERS -->
+          <section
+            class="admin-page"
+            data-admin-page="members"
+            aria-labelledby="members-title"
+            hidden
+          >
+            <div class="page-heading">
+              <div>
+                <p class="eyebrow">COMMUNITY</p>
+                <h2 id="members-title">Members</h2>
+                <p>View profiles, membership status and customer history.</p>
+              </div>
+              <div>
+                <button class="secondary-button" data-action="export-members">
+                  Export</button
+                ><button class="primary-button" data-action="add-member">
+                  + Add member
+                </button>
+              </div>
+            </div>
+            <div class="metric-grid compact">
+              <article class="metric-card">
+                <span>Total members</span><strong>1,284</strong>
+                <p><span class="trend up">+86</span> this month</p>
+              </article>
+              <article class="metric-card">
+                <span>Active</span><strong>1,196</strong>
+              </article>
+              <article class="metric-card">
+                <span>New this month</span><strong>86</strong>
+              </article>
+              <article class="metric-card">
+                <span>Renewals due</span><strong>42</strong>
+              </article>
+            </div>
+            <div class="toolbar">
+              <input
+                type="search"
+                data-table-search="members-table"
+                placeholder="Search member name or email"
+              /><select
+                data-table-filter="members-table"
+                data-filter-column="4"
+              >
+                <option value="">All statuses</option>
+                <option>Active</option>
+                <option>Pending</option>
+                <option>Expired</option></select
+              ><select>
+                <option>All countries</option>
+                <option>United States</option>
+                <option>United Kingdom</option>
+                <option>Canada</option>
+                <option>Australia</option>
+              </select>
+            </div>
+            <section class="panel table-panel">
+              <div class="table-wrap">
+                <table id="members-table">
+                  <thead>
+                    <tr>
+                      <th>Member</th>
+                      <th>Country</th>
+                      <th>Joined</th>
+                      <th>Orders</th>
+                      <th>Status</th>
+                      <th>Last active</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>
+                        <span class="person-cell"
+                          ><i>EC</i
+                          ><span
+                            >Emily Carter<small>emily@example.com</small></span
+                          ></span
+                        >
+                      </td>
+                      <td>United States</td>
+                      <td>Aug 18, 2026</td>
+                      <td>4</td>
+                      <td><span class="status success">Active</span></td>
+                      <td>Today</td>
+                      <td>
+                        <button class="row-menu" data-action="view-member">
+                          View
+                        </button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <span class="person-cell"
+                          ><i>JB</i
+                          ><span
+                            >James Brooks<small>james@example.com</small></span
+                          ></span
+                        >
+                      </td>
+                      <td>United Kingdom</td>
+                      <td>Jul 26, 2026</td>
+                      <td>2</td>
+                      <td><span class="status success">Active</span></td>
+                      <td>Yesterday</td>
+                      <td>
+                        <button class="row-menu" data-action="view-member">
+                          View
+                        </button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <span class="person-cell"
+                          ><i>ST</i
+                          ><span
+                            >Sophia Taylor<small
+                              >sophia@example.com</small
+                            ></span
+                          ></span
+                        >
+                      </td>
+                      <td>Canada</td>
+                      <td>Sep 1, 2026</td>
+                      <td>1</td>
+                      <td><span class="status pending">Pending</span></td>
+                      <td>2 days ago</td>
+                      <td>
+                        <button class="row-menu" data-action="view-member">
+                          Review
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </section>
+
+          <!-- MEMBERSHIP APPLICATIONS -->
+          <section
+            class="admin-page"
+            data-admin-page="applications"
+            aria-labelledby="applications-title"
+            hidden
+          >
+            <div class="page-heading">
+              <div>
+                <p class="eyebrow">MEMBERSHIP QUEUE</p>
+                <h2 id="applications-title">Applications</h2>
+                <p>Review and decide membership applications.</p>
+              </div>
+            </div>
+            <div class="application-queue">
+              <article class="application-review-card">
+                <div class="application-person">
+                  <span class="avatar large">ST</span>
+                  <div>
+                    <h3>Sophia Taylor</h3>
+                    <p>sophia@example.com • Canada</p>
+                  </div>
+                  <span class="status pending">New</span>
+                </div>
+                <div class="application-answer">
+                  <small>INTEREST</small>
+                  <p>Exclusive content and meet-and-greet opportunities</p>
+                </div>
+                <div class="application-answer">
+                  <small>WHY THEY WANT TO JOIN</small>
+                  <p>
+                    I attend several live shows each year and would like updates
+                    about approved community experiences.
+                  </p>
+                </div>
+                <div class="review-actions">
+                  <button
+                    class="danger-button"
+                    data-action="decline-application"
+                  >
+                    Decline</button
+                  ><button
+                    class="secondary-button"
+                    data-action="hold-application"
+                  >
+                    Hold</button
+                  ><button
+                    class="primary-button"
+                    data-action="approve-application"
+                  >
+                    Approve member
+                  </button>
+                </div>
+              </article>
+              <article class="application-review-card">
+                <div class="application-person">
+                  <span class="avatar large">ND</span>
+                  <div>
+                    <h3>Noah Davis</h3>
+                    <p>noah@example.com • United States</p>
+                  </div>
+                  <span class="status pending">New</span>
+                </div>
+                <div class="application-answer">
+                  <small>INTEREST</small>
+                  <p>Exclusive content and special offers</p>
+                </div>
+                <div class="application-answer">
+                  <small>WHY THEY WANT TO JOIN</small>
+                  <p>
+                    I want to receive official updates and access member-only
+                    releases.
+                  </p>
+                </div>
+                <div class="review-actions">
+                  <button
+                    class="danger-button"
+                    data-action="decline-application"
+                  >
+                    Decline</button
+                  ><button
+                    class="secondary-button"
+                    data-action="hold-application"
+                  >
+                    Hold</button
+                  ><button
+                    class="primary-button"
+                    data-action="approve-application"
+                  >
+                    Approve member
+                  </button>
+                </div>
+              </article>
+            </div>
+          </section>
+
+          <!-- PAYMENTS -->
+          <section
+            class="admin-page"
+            data-admin-page="payments"
+            aria-labelledby="payments-title"
+            hidden
+          >
+            <div class="page-heading">
+              <div>
+                <p class="eyebrow">MONEY MOVEMENT</p>
+                <h2 id="payments-title">Payments</h2>
+                <p>Monitor verified payments, manual reviews and refunds.</p>
+              </div>
+              <button class="secondary-button" data-action="export-payments">
+                Download report
+              </button>
+            </div>
+            <div class="payment-breakdown">
+              <article>
+                <span>Bank Transfer</span><strong>Manual review</strong
+                ><progress value="0" max="100">0%</progress
+                ><small>Off-website transfer</small>
+              </article>
+              <article>
+                <span>PayPal</span><strong>Manual review</strong
+                ><progress value="0" max="100">0%</progress
+                ><small>Off-website transfer</small>
+              </article>
+              <article>
+                <span>Cash App</span><strong>Manual review</strong
+                ><progress value="0" max="100">0%</progress
+                ><small>Off-website transfer</small>
+              </article>
+              <article>
+                <span>Chime</span><strong>Manual review</strong
+                ><progress value="0" max="100">0%</progress
+                ><small>Off-website transfer</small>
+              </article>
+            </div>
+            <section class="panel">
+              <div class="panel-head">
+                <div>
+                  <p class="panel-kicker">ACTION NEEDED</p>
+                  <h3>Payment verification queue</h3>
+                </div>
+                <span class="status pending">Loading queue</span>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Order</th>
+                      <th>Customer</th>
+                      <th>Method</th>
+                      <th>Submitted</th>
+                      <th>Amount</th>
+                      <th>Evidence</th>
+                      <th>Decision</th>
+                    </tr>
+                  </thead>
+                  <tbody id="manual-payment-queue">
+                    <tr>
+                      <td colspan="7">Loading live payment requests…</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </section>
+
+          <!-- SERVICE REQUESTS -->
+          <section
+            class="admin-page"
+            data-admin-page="services"
+            aria-labelledby="service-requests-title"
+            hidden
+          >
+            <div class="page-heading">
+              <div>
+                <p class="eyebrow">SPECIAL REQUESTS</p>
+                <h2 id="service-requests-title">Service requests</h2>
+                <p>
+                  Manage private-event, appearance and meet-and-greet enquiries.
+                </p>
+              </div>
+            </div>
+            <div class="request-columns">
+              <section class="panel">
+                <div class="panel-head">
+                  <h3>New requests</h3>
+                  <span class="status pending">4</span>
+                </div>
+                <div class="request-list">
+                  <button class="request-item is-selected">
+                    <span class="avatar">AC</span
+                    ><span
+                      ><strong>Apex Creative</strong
+                      ><small>Private event enquiry</small></span
+                    ><time>10m</time></button
+                  ><button class="request-item">
+                    <span class="avatar">RH</span
+                    ><span
+                      ><strong>Rachel Hall</strong
+                      ><small>Meet-and-greet request</small></span
+                    ><time>1h</time></button
+                  ><button class="request-item">
+                    <span class="avatar">BK</span
+                    ><span
+                      ><strong>BrightKey Media</strong
+                      ><small>Corporate appearance</small></span
+                    ><time>3h</time>
+                  </button>
+                </div>
+              </section>
+              <section class="panel request-detail">
+                <div class="request-detail-head">
+                  <div>
+                    <p class="panel-kicker">PRIVATE EVENT ENQUIRY</p>
+                    <h3>Apex Creative</h3>
+                    <p>alex@apexcreative.com</p>
+                  </div>
+                  <span class="status pending">New</span>
+                </div>
+                <dl>
+                  <div>
+                    <dt>Received</dt>
+                    <dd>September 3, 2026 • 2:33 PM</dd>
+                  </div>
+                  <div>
+                    <dt>Organisation</dt>
+                    <dd>Apex Creative LLC</dd>
+                  </div>
+                </dl>
+                <div class="message-body">
+                  <p>
+                    We are organising a corporate celebration in New York and
+                    would like information about availability, pricing and
+                    booking requirements.
+                  </p>
+                </div>
+                <textarea
+                  aria-label="Reply message"
+                  rows="5"
+                  placeholder="Write a reply..."
+                ></textarea>
+                <div class="review-actions">
+                  <button
+                    class="secondary-button"
+                    data-action="archive-request"
+                  >
+                    Archive</button
+                  ><button class="primary-button" data-action="reply-request">
+                    Send reply
+                  </button>
+                </div>
+              </section>
+            </div>
+          </section>
+
+          <!-- ADMIN TEAM -->
+          <section
+            class="admin-page"
+            data-admin-page="team"
+            aria-labelledby="team-title"
+            hidden
+          >
+            <div class="page-heading">
+              <div>
+                <p class="eyebrow">ACCESS CONTROL</p>
+                <h2 id="team-title">Admin team</h2>
+                <p>Manage who can access this private dashboard.</p>
+              </div>
+              <button class="primary-button" data-action="invite-admin">
+                + Invite administrator
+              </button>
+            </div>
+            <div class="team-grid">
+              <article class="team-card">
+                <span class="avatar large">LA</span>
+                <div>
+                  <h3>Lead Admin</h3>
+                  <p>admin@example.com</p>
+                  <span class="status danger">Super administrator</span>
+                </div>
+                <dl>
+                  <div>
+                    <dt>Last active</dt>
+                    <dd>Now</dd>
+                  </div>
+                  <div>
+                    <dt>Two-step verification</dt>
+                    <dd class="positive">Enabled</dd>
+                  </div>
+                </dl>
+                <button class="secondary-button" disabled>
+                  Protected account
+                </button>
+              </article>
+              <article class="team-card">
+                <span class="avatar large">SM</span>
+                <div>
+                  <h3>Sarah Miller</h3>
+                  <p>sarah@example.com</p>
+                  <span class="status info">Event manager</span>
+                </div>
+                <dl>
+                  <div>
+                    <dt>Last active</dt>
+                    <dd>2 hours ago</dd>
+                  </div>
+                  <div>
+                    <dt>Two-step verification</dt>
+                    <dd class="positive">Enabled</dd>
+                  </div>
+                </dl>
+                <button class="secondary-button" data-action="manage-admin">
+                  Manage access
+                </button>
+              </article>
+            </div>
+          </section>
+
+          <!-- AUDIT LOG -->
+          <section
+            class="admin-page"
+            data-admin-page="audit"
+            aria-labelledby="audit-title"
+            hidden
+          >
+            <div class="page-heading">
+              <div>
+                <p class="eyebrow">SECURITY HISTORY</p>
+                <h2 id="audit-title">Audit log</h2>
+                <p>Track important actions completed by administrators.</p>
+              </div>
+              <button class="secondary-button" data-action="export-audit">
+                Export log
+              </button>
+            </div>
+            <div class="toolbar">
+              <input
+                type="search"
+                data-table-search="audit-table"
+                placeholder="Search actions or administrator"
+              /><select>
+                <option>All actions</option>
+                <option>Authentication</option>
+                <option>Orders</option>
+                <option>Payments</option>
+                <option>Membership</option>
+                <option>Settings</option></select
+              ><button class="secondary-button" data-action="filter-date">
+                Date range
+              </button>
+            </div>
+            <section class="panel table-panel">
+              <div class="table-wrap">
+                <table id="audit-table">
+                  <thead>
+                    <tr>
+                      <th>Date & time</th>
+                      <th>Administrator</th>
+                      <th>Action</th>
+                      <th>Target</th>
+                      <th>Device/IP</th>
+                      <th>Result</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Sep 3, 2:46 PM</td>
+                      <td>Lead Admin</td>
+                      <td>Approved payment</td>
+                      <td>#LIVE-834290</td>
+                      <td>Chrome • 102.89.xxx.xxx</td>
+                      <td><span class="status success">Success</span></td>
+                    </tr>
+                    <tr>
+                      <td>Sep 3, 2:31 PM</td>
+                      <td>Sarah Miller</td>
+                      <td>Updated event inventory</td>
+                      <td>Matt Rife — Live</td>
+                      <td>Safari • 172.58.xxx.xxx</td>
+                      <td><span class="status success">Success</span></td>
+                    </tr>
+                    <tr>
+                      <td>Sep 3, 1:55 PM</td>
+                      <td>Lead Admin</td>
+                      <td>Administrator sign in</td>
+                      <td>Admin account</td>
+                      <td>Chrome • 102.89.xxx.xxx</td>
+                      <td><span class="status success">Success</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </section>
+
+          <!-- SETTINGS -->
+          <section
+            class="admin-page"
+            data-admin-page="settings"
+            aria-labelledby="settings-title"
+            hidden
+          >
+            <div class="page-heading">
+              <div>
+                <p class="eyebrow">PLATFORM CONTROL</p>
+                <h2 id="settings-title">Settings</h2>
+                <p>Manage business, payment and notification preferences.</p>
+              </div>
+              <button class="primary-button" type="submit" form="settings-form">
+                Save changes
+              </button>
+            </div>
+            <form id="settings-form" class="settings-layout">
+              <nav class="settings-nav" aria-label="Settings sections">
+                <button
+                  type="button"
+                  class="is-active"
+                  data-settings-tab="business"
+                >
+                  Business profile</button
+                ><button type="button" data-settings-tab="payments">
+                  Payment methods</button
+                ><button type="button" data-settings-tab="tickets">
+                  Ticket settings</button
+                ><button type="button" data-settings-tab="notifications">
+                  Notifications</button
+                ><button type="button" data-settings-tab="security">
+                  Security</button
+                ><button type="button" data-settings-tab="pwa">
+                  Installable app
+                </button>
+              </nav>
+              <div class="panel settings-panel" data-settings-panel="business">
+                <h3>Business profile</h3>
+                <p class="panel-description">
+                  These details appear on receipts and customer communications.
+                </p>
+                <div class="form-grid">
+                  <label
+                    ><span>Business name</span
+                    ><input name="business-name" value="Live Events" /></label
+                  ><label
+                    ><span>Support email</span
+                    ><input
+                      type="email"
+                      name="support-email"
+                      value="support@example.com" /></label
+                  ><label
+                    ><span>Default currency</span
+                    ><select name="currency">
+                      <option>USD</option>
+                      <option>GBP</option>
+                      <option>EUR</option>
+                      <option>CAD</option>
+                    </select></label
+                  ><label
+                    ><span>Timezone</span
+                    ><select name="timezone">
+                      <option>America/New_York</option>
+                      <option>America/Los_Angeles</option>
+                      <option>Europe/London</option>
+                      <option>Africa/Lagos</option>
+                    </select></label
+                  ><label class="full-width"
+                    ><span>Receipt footer</span
+                    ><textarea name="receipt-footer" rows="4">
+Thank you for your purchase. We look forward to seeing you at the show.</textarea>
+                  </label>
+                </div>
+              </div>
+              <div
+                class="panel settings-panel"
+                data-settings-panel="payments"
+                hidden
+              >
+                <h3>Payment methods</h3>
+                <p class="panel-description">
+                  PayPal, Cash App, Chime and bank transfer are handled as
+                  administrator-assigned off-website transfers.
+                </p>
+                <div class="integration-list">
+                  <article>
+                    <span class="integration-icon">↗</span>
+                    <div>
+                      <strong>Manual transfer workflow</strong
+                      ><small>Administrator assignment and verification required</small>
+                    </div>
+                  </article>
+                </div>
+              </div>
+              <div
+                class="panel settings-panel"
+                data-settings-panel="tickets"
+                hidden
+              >
+                <h3>Order hold settings</h3>
+                <p class="panel-description">
+                  Set the short reservation window for pending order requests.
+                </p>
+                <div class="form-grid">
+                  <label
+                    ><span>Ticket hold time</span
+                    ><select>
+                      <option>10 minutes</option>
+                      <option>15 minutes</option>
+                      <option>20 minutes</option>
+                    </select></label
+                  >
+                </div>
+              </div>
+              <div
+                class="panel settings-panel"
+                data-settings-panel="notifications"
+                hidden
+              >
+                <h3>Notifications</h3>
+                <p class="panel-description">
+                  Choose which activity alerts administrators receive.
+                </p>
+                <div class="toggle-list">
+                  <label
+                    ><span
+                      ><strong>New orders</strong
+                      ><small
+                        >Send an alert for every completed order</small
+                      ></span
+                    ><span class="switch"
+                      ><input type="checkbox" checked /><i></i></span></label
+                  ><label
+                    ><span
+                      ><strong>Payment reviews</strong
+                      ><small
+                        >Alert when manual verification is required</small
+                      ></span
+                    ><span class="switch"
+                      ><input type="checkbox" checked /><i></i></span></label
+                  ><label
+                    ><span
+                      ><strong>Membership applications</strong
+                      ><small>Alert when a new application arrives</small></span
+                    ><span class="switch"
+                      ><input type="checkbox" checked /><i></i></span
+                  ></label>
+                </div>
+              </div>
+              <div
+                class="panel settings-panel"
+                data-settings-panel="security"
+                hidden
+              >
+                <h3>Security</h3>
+                <p class="panel-description">
+                  Protect this private dashboard and administrator accounts.
+                </p>
+                <div class="security-list">
+                  <article>
+                    <div>
+                      <strong>Require two-step verification</strong
+                      ><small>Required for every administrator</small>
+                    </div>
+                    <span class="status success">Enabled</span>
+                  </article>
+                  <article>
+                    <div>
+                      <strong>Automatic sign-out</strong
+                      ><small
+                        >Sign out inactive administrators after 30
+                        minutes</small
+                      >
+                    </div>
+                    <button type="button" class="secondary-button">
+                      Change
+                    </button>
+                  </article>
+                  <article>
+                    <div>
+                      <strong>Allowed access locations</strong
+                      ><small
+                        >Restrict dashboard access by country or IP
+                        address</small
+                      >
+                    </div>
+                    <button type="button" class="secondary-button">
+                      Configure
+                    </button>
+                  </article>
+                </div>
+              </div>
+              <div
+                class="panel settings-panel"
+                data-settings-panel="pwa"
+                hidden
+              >
+                <h3>Installable admin app</h3>
+                <p class="panel-description">
+                  Install this dashboard on approved phones and computers.
+                </p>
+                <div class="pwa-card">
+                  <span class="brand-mark">M</span>
+                  <div>
+                    <strong>Live Admin</strong
+                    ><small>Progressive Web App</small>
+                  </div>
+                  <button
+                    type="button"
+                    class="primary-button"
+                    data-action="install-pwa"
+                  >
+                    Install app
+                  </button>
+                </div>
+                <ul class="check-list">
+                  <li>Fast app-like dashboard</li>
+                  <li>Private authenticated access</li>
+                  <li>Secure update notifications</li>
+                  <li>Optional push alerts for important activity</li>
+                </ul>
+              </div>
+            </form>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <!-- Reusable side panel for records and forms -->
+    <div
+      class="drawer"
+      id="admin-drawer"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="drawer-title"
+      hidden
+    >
+      <button
+        class="drawer-backdrop"
+        type="button"
+        data-action="close-drawer"
+        aria-label="Close panel"
+      ></button>
+      <section class="drawer-panel">
+        <header>
+          <div>
+            <p class="eyebrow" id="drawer-kicker">DETAILS</p>
+            <h2 id="drawer-title">Record details</h2>
+          </div>
+          <button
+            class="icon-button"
+            type="button"
+            data-action="close-drawer"
+            aria-label="Close panel"
+          >
+            ×
+          </button>
+        </header>
+        <div class="drawer-content" id="drawer-content"></div>
+        <footer id="drawer-footer"></footer>
+      </section>
+    </div>
+
+    <!-- Confirmation dialog for sensitive actions -->
+    <div
+      class="confirm-dialog"
+      id="confirm-dialog"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="confirm-title"
+      aria-describedby="confirm-message"
+      hidden
+    >
+      <button
+        class="dialog-backdrop"
+        type="button"
+        data-action="cancel-confirm"
+        aria-label="Cancel"
+      ></button>
+      <section class="confirm-card">
+        <span class="confirm-icon" aria-hidden="true">!</span>
+        <h2 id="confirm-title">Confirm action</h2>
+        <p id="confirm-message">Are you sure you want to continue?</p>
+        <div>
+          <button
+            class="secondary-button"
+            type="button"
+            data-action="cancel-confirm"
+          >
+            Cancel</button
+          ><button
+            class="danger-button"
+            type="button"
+            id="confirm-action-button"
+          >
+            Confirm
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <div class="confirm-dialog" id="admin-recovery-dialog" role="dialog" aria-modal="true" aria-labelledby="recovery-title" hidden>
+      <button class="dialog-backdrop" type="button" data-action="close-recovery" aria-label="Close recovery"></button>
+      <section class="confirm-card recovery-card">
+        <h2 id="recovery-title">Administrator recovery</h2>
+        <p id="recovery-message">Enter your administrator login email.</p>
+        <form id="admin-recovery-form" class="drawer-form">
+          <label>Login email<input name="recovery-email" type="email" autocomplete="username" required /></label>
+          <button class="primary-button" type="button" data-action="send-recovery-code">Send verification code</button>
+          <div id="recovery-code-fields" hidden>
+            <label>Verification Code<input name="recovery-code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" /></label>
+            <div class="recovery-actions">
+              <button class="primary-button" type="button" data-action="verify-recovery-code">Verify Code</button>
+              <button class="secondary-button" type="button" data-action="resend-recovery-code">Resend Code</button>
+            </div>
+          </div>
+          <div id="recovery-password-fields" hidden>
+            <label>New password<input name="recovery-new-password" type="password" autocomplete="new-password" minlength="12" /></label>
+            <label>Confirm new password<input name="recovery-confirm-password" type="password" autocomplete="new-password" minlength="12" /></label>
+            <button class="primary-button" type="button" data-action="reset-admin-password">Reset password</button>
+          </div>
+          <button class="text-button" type="button" data-action="close-recovery">Cancel</button>
+        </form>
+      </section>
+    </div>
+
+    <div
+      class="toast-region"
+      id="admin-toast-region"
+      aria-live="polite"
+      aria-atomic="true"
+    ></div>
+    <script src="admin.js?v=3" defer></script>
+  </body>
+</html>
