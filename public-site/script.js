@@ -1,4 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
+  const configuredApiBase = document.querySelector('meta[name="public-api-base-url"]')?.content.trim();
+  const apiBase = configuredApiBase && configuredApiBase !== "__PUBLIC_API_BASE_URL__" ? configuredApiBase.replace(/\/$/, "") : "";
   const isCombinedLocalPreview =
     globalThis.location.hostname === "localhost" &&
     globalThis.location.pathname === "/";
@@ -133,7 +135,7 @@ document.addEventListener("DOMContentLoaded", () => {
       ...(options.headers || {}),
     };
     if (csrfToken) headers["X-CSRF-Token"] = csrfToken;
-    const response = await fetch(`/api/v1${path}`, {
+    const response = await fetch(`${apiBase}/api/v1${path}`, {
       credentials: "include",
       ...options,
       headers,

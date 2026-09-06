@@ -1,0 +1,8 @@
+[build]
+  base = "."
+  command = "npm run build:public"
+  publish = "dist/public-site"
+
+[build.environment]
+  NODE_VERSION = "20"
+  PUBLIC_API_BASE_URL = "https://live-events-website.onrender.com"

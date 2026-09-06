@@ -21,5 +21,11 @@ for (const [name, definition] of builds) {
     const html = fs.readFileSync(indexPath, "utf8").replace("__ADMIN_API_BASE_URL__", apiBase);
     fs.writeFileSync(indexPath, html);
   }
+  if (name === "public") {
+    const apiBase = String(process.env.PUBLIC_API_BASE_URL || "").replace(/\/$/, "");
+    const indexPath = path.join(definition.destination, "index.html");
+    const html = fs.readFileSync(indexPath, "utf8").replace("__PUBLIC_API_BASE_URL__", apiBase);
+    fs.writeFileSync(indexPath, html);
+  }
   console.log(`${name} deployment package built (${definition.required.length} validated assets).`);
 }
