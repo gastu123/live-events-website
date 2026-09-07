@@ -1,0 +1,47 @@
+{
+  "name": "live-events-platform",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch server/index.js",
+    "start": "node server/index.js",
+    "check": "node --check server/index.js && node --check server/app.js && node --check script.js && node --check admin.js",
+    "lint": "eslint .",
+    "test": "node --test --test-reporter=spec",
+    "test:migrations": "node scripts/validate-migrations.js",
+    "test:storage": "node scripts/test-storage-bucket.js",
+    "build": "node scripts/build.js all",
+    "build:public": "node scripts/build.js public",
+    "build:admin": "node scripts/build.js admin",
+    "migrate": "node scripts/migrate.js",
+    "seed": "node scripts/seed.js",
+    "init:storage": "node scripts/init-storage-bucket.js",
+    "scan:evidence": "node scripts/scan-evidence.js",
+    "scan:evidence:dry": "node scripts/scan-evidence.js --dry-run",
+    "smoke:hosted": "node scripts/smoke-hosted.js",
+    "bootstrap:admin": "node scripts/bootstrap-admin.js",
+    "test:brevo": "node scripts/test-brevo.js",
+    "verify:admin": "node scripts/verify-hosted-admin.js",
+    "audit": "npm audit --omit=dev"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.57.4",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.1.0",
+    "helmet": "^8.1.0",
+    "dotenv": "^17.2.2",
+    "pg": "^8.16.3",
+    "pino": "^9.9.4",
+    "zod": "^4.1.5"
+  },
+  "devDependencies": {
+    "eslint": "^9.35.0",
+    "supertest": "^7.1.4"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -36,6 +36,33 @@ document.addEventListener("DOMContentLoaded", () => {
     pendingConfirm = null,
     deferredInstallPrompt = null,
     recoveryResetToken = "";
+  const authStorageKey = "live-admin-session";
+  let authTokens = loadAuthTokens();
+  function loadAuthTokens() {
+    try {
+      return JSON.parse(sessionStorage.getItem(authStorageKey) || "null");
+    } catch {
+      return null;
+    }
+  }
+  function saveAuthTokens(result) {
+    if (!result?.accessToken || !result?.refreshToken) return;
+    authTokens = {
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
+    };
+    try {
+      sessionStorage.setItem(authStorageKey, JSON.stringify(authTokens));
+    } catch {
+      authTokens = null;
+    }
+  }
+  function clearAuthTokens() {
+    authTokens = null;
+    try {
+      sessionStorage.removeItem(authStorageKey);
+    } catch {}
+  }
   const el = (tag, attrs = {}, ...children) => {
     const node = document.createElement(tag);
     for (const [key, value] of Object.entries(attrs)) {
@@ -74,6 +101,8 @@ document.addEventListener("DOMContentLoaded", () => {
       ...(options.headers || {}),
     };
     if (csrfToken) headers["X-CSRF-Token"] = csrfToken;
+    if (authTokens?.accessToken && !headers.Authorization)
+      headers.Authorization = `Bearer ${authTokens.accessToken}`;
     const response = await fetch(`${apiBase}/api/v1${path}`, {
       credentials: "include",
       ...options,
@@ -1026,6 +1055,7 @@ document.addEventListener("DOMContentLoaded", () => {
         await api("/auth/admin/logout", { method: "POST", body: "{}" });
       } finally {
         csrfToken = "";
+        clearAuthTokens();
         showAuthenticated(false);
         if ("caches" in window) {
           const keys = await caches.keys();
@@ -1403,16 +1433,21 @@ document.addEventListener("DOMContentLoaded", () => {
       const data = new FormData(form);
       const result = await api("/auth/admin/login", {
         method: "POST",
+        headers: { "X-Auth-Transport": "bearer-fallback" },
         body: JSON.stringify({
           email: data.get("admin-email"),
           password: data.get("admin-password"),
         }),
       });
       csrfToken = result.csrfToken;
+      saveAuthTokens(result);
+      await api("/admin/overview");
       showAuthenticated(true);
       await navigate(window.location.hash.slice(1) || "overview");
       toast("Administrator session started.", "success");
     } catch (error) {
+      clearAuthTokens();
+      showAuthenticated(false);
       toast(error.message, "error");
     } finally {
       submit.disabled = false;
@@ -1478,9 +1513,11 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const refreshed = await api("/auth/admin/refresh", {
         method: "POST",
-        body: "{}",
+        headers: { "X-Auth-Transport": "bearer-fallback" },
+        body: JSON.stringify({ refreshToken: authTokens?.refreshToken || "" }),
       });
       csrfToken = refreshed.csrfToken;
+      saveAuthTokens(refreshed);
       await api("/admin/overview");
       showAuthenticated(true);
       await navigate(window.location.hash.slice(1) || "overview");

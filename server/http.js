@@ -24,6 +24,7 @@ export function requestId(req, res, next) {
 export function csrf(req, _res, next) {
   if (["GET", "HEAD", "OPTIONS"].includes(req.method)) return next();
   const adminRoute = req.path.startsWith("/admin") || req.path.startsWith("/auth/admin");
+  if (adminRoute && /^Bearer\s+/i.test(req.get("authorization") || "")) return next();
   const accessCookie = adminRoute ? "admin_access_token" : "customer_access_token";
   const csrfCookie = adminRoute ? "admin_csrf" : "customer_csrf";
   if (!req.cookies[accessCookie]) return next();

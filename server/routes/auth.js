@@ -98,23 +98,43 @@ export function authRoutes({ auth, db, loginLimiter, mailer, config, csrfMiddlew
         "insert into audit_logs(admin_user_id, action, entity_type, entity_id, request_id, metadata) values($1,'admin.login','admin_user',$1,$2,'{}')",
         [admin.id, res.locals.requestId],
       );
-      ok(res, { csrfToken, expiresIn: data.session.expires_in });
+      const bearerFallback = req.get("x-auth-transport") === "bearer-fallback";
+      ok(res, {
+        csrfToken,
+        expiresIn: data.session.expires_in,
+        ...(bearerFallback
+          ? {
+              accessToken: data.session.access_token,
+              refreshToken: data.session.refresh_token,
+            }
+          : {}),
+      });
     }),
   );
   const refresh = (kind) => asyncRoute(async (req, res) => {
       const refreshCookie = kind === "admin" ? "admin_refresh_token" : "customer_refresh_token";
-      if (!req.cookies[refreshCookie])
+      const refreshToken = req.cookies[refreshCookie] || String(req.body?.refreshToken || "");
+      if (!refreshToken)
         throw new HttpError(
           401,
           "REFRESH_REQUIRED",
           "Refresh session is unavailable.",
         );
       const { data, error } = await auth.anon.auth.refreshSession({
-        refresh_token: req.cookies[refreshCookie],
+        refresh_token: refreshToken,
       });
       if (error || !data.session)
         throw new HttpError(401, "REFRESH_FAILED", "Session refresh failed.");
-      ok(res, { csrfToken: auth.setSession(res, data.session, kind) });
+      const bearerFallback = req.get("x-auth-transport") === "bearer-fallback";
+      ok(res, {
+        csrfToken: auth.setSession(res, data.session, kind),
+        ...(bearerFallback
+          ? {
+              accessToken: data.session.access_token,
+              refreshToken: data.session.refresh_token,
+            }
+          : {}),
+      });
     });
   router.post("/refresh", refresh("customer"));
   router.post("/admin/refresh", refresh("admin"));
@@ -263,8 +283,9 @@ export function authRoutes({ auth, db, loginLimiter, mailer, config, csrfMiddlew
   );
   const logout = (kind) => asyncRoute(async (req, res) => {
       const accessCookie = kind === "admin" ? "admin_access_token" : "customer_access_token";
-      if (req.cookies[accessCookie])
-        await auth.service.auth.admin.signOut(req.cookies[accessCookie]).catch(() => {});
+      const accessToken = req.cookies[accessCookie] || req.get("authorization")?.match(/^Bearer\s+(.+)$/i)?.[1];
+      if (accessToken)
+        await auth.service.auth.admin.signOut(accessToken).catch(() => {});
       auth.clearSession(res, kind);
       res.set("Clear-Site-Data", '"cache"');
       ok(res, { loggedOut: true });

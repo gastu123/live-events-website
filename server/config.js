@@ -4,6 +4,7 @@ const bool = z
   .string()
   .default("false")
   .transform((value) => value === "true");
+const deployedAdminOrigin = "https://live-events-admin.netlify.app";
 const schema = z
   .object({
     NODE_ENV: z
@@ -51,7 +52,7 @@ export function loadConfig(environment = process.env) {
     throw new Error("Cross-site administrator cookies require production HTTPS.");
   config.DEVELOPMENT_DEMO = false;
   config.allowedOrigins = [
-    ...new Set([config.PUBLIC_ORIGIN, config.ADMIN_ORIGIN]),
+    ...new Set([config.PUBLIC_ORIGIN, config.ADMIN_ORIGIN, deployedAdminOrigin]),
   ];
   config.adminAllowedCountries = config.ADMIN_ALLOWED_COUNTRIES.split(",")
     .map((v) => v.trim())

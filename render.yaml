@@ -1,0 +1,52 @@
+services:
+  - type: web
+    name: live-events-website-backend
+    env: node
+    plan: free
+    rootDir: .
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PUBLIC_ORIGIN
+        sync: false
+      - key: ADMIN_ORIGIN
+        value: https://live-events-admin.netlify.app
+      - key: DATABASE_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: COOKIE_SECRET
+        sync: false
+      - key: TRUST_PROXY
+        value: "true"
+      - key: ADMIN_ALLOWED_COUNTRIES
+        sync: false
+      - key: ADMIN_ALLOWED_IPS
+        sync: false
+      - key: MANUAL_PAYMENT_EVIDENCE_BUCKET
+        value: manual-payment-evidence
+      - key: INITIAL_SUPER_ADMIN_EMAIL
+        sync: false
+      - key: INITIAL_SUPER_ADMIN_PASSWORD
+        sync: false
+      - key: BREVO_API_KEY
+        sync: false
+      - key: BREVO_SENDER_EMAIL
+        sync: false
+      - key: BREVO_SENDER_NAME
+        sync: false
+      - key: EMAIL_PROVIDER
+        value: disabled
+      - key: ADMIN_OTP_TTL_MINUTES
+        value: "10"
+      - key: ADMIN_CROSS_SITE_COOKIES
+        value: "true"
+      - key: VIRUSTOTAL_API_KEY
+        sync: false

@@ -1,5 +1,5 @@
 "use strict";
-const CACHE = "live-admin-static-v4";
+const CACHE = "live-admin-static-v5";
 const scoped = (path) => new URL(path, self.registration.scope).pathname;
 const SAFE_ASSETS = ["admin-offline.html", "admin-offline.css", "admin-offline.js", "admin.css", "admin.js", "assets/admin-icons/admin-icon-192.png", "assets/admin-icons/admin-icon-512.png"].map(scoped);
 self.addEventListener("install", (event) =>

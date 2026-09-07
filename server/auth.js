@@ -5,7 +5,10 @@ import { HttpError } from "./http.js";
 const cookieOptions = (config) => ({
   httpOnly: true,
   secure: config.NODE_ENV === "production" || config.ADMIN_CROSS_SITE_COOKIES,
-  sameSite: config.ADMIN_CROSS_SITE_COOKIES ? "none" : "strict",
+  sameSite:
+    config.NODE_ENV === "production" || config.ADMIN_CROSS_SITE_COOKIES
+      ? "none"
+      : "strict",
   path: "/",
   maxAge: 60 * 60 * 1000,
 });
@@ -31,7 +34,10 @@ export function createAuth(config, db) {
     const csrfToken = crypto.randomBytes(24).toString("base64url");
     res.cookie(names.csrf, csrfToken, {
       secure: config.NODE_ENV === "production" || config.ADMIN_CROSS_SITE_COOKIES,
-      sameSite: config.ADMIN_CROSS_SITE_COOKIES ? "none" : "strict",
+      sameSite:
+        config.NODE_ENV === "production" || config.ADMIN_CROSS_SITE_COOKIES
+          ? "none"
+          : "strict",
       path: "/",
       maxAge: 30 * 86400000,
     });
@@ -43,7 +49,10 @@ export function createAuth(config, db) {
       res.clearCookie(name, {
         path: "/",
         secure: config.NODE_ENV === "production" || config.ADMIN_CROSS_SITE_COOKIES,
-        sameSite: config.ADMIN_CROSS_SITE_COOKIES ? "none" : "strict",
+        sameSite:
+          config.NODE_ENV === "production" || config.ADMIN_CROSS_SITE_COOKIES
+            ? "none"
+            : "strict",
       }),
     );
   };
@@ -91,10 +100,12 @@ export function createAuth(config, db) {
     async (req, _res, next) => {
       try {
         validateAdminNetwork(req);
-        const token = req.cookies.admin_access_token;
-        if (!token)
+        const cookieToken = req.cookies.admin_access_token;
+        const bearerToken = req.get("authorization")?.match(/^Bearer\s+(.+)$/i)?.[1];
+        const accessToken = bearerToken || cookieToken;
+        if (!accessToken)
           throw new HttpError(401, "AUTH_REQUIRED", "Authentication required.");
-        const { data: user, error } = await service.auth.getUser(token);
+        const { data: user, error } = await service.auth.getUser(accessToken);
         if (error || !user?.user)
           throw new HttpError(401, "SESSION_INVALID", "Session is invalid or expired.");
         req.user = user.user;
@@ -113,7 +124,7 @@ export function createAuth(config, db) {
             "ADMIN_REQUIRED",
             "Administrator access required.",
           );
-        const issuedAt = Number(req.user?.iat || decodeJwtIssuedAt(req.cookies.admin_access_token));
+        const issuedAt = Number(req.user?.iat || decodeJwtIssuedAt(accessToken));
         if (
           admin.sessions_invalidated_at &&
           (!issuedAt || issuedAt * 1000 < new Date(admin.sessions_invalidated_at).getTime())
