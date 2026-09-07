@@ -1495,7 +1495,7 @@ document.addEventListener("DOMContentLoaded", () => {
     window.addEventListener("load", async () => {
       try {
         const registration =
-          await navigator.serviceWorker.register("admin-sw.js");
+          await navigator.serviceWorker.register("admin-sw.js?v=5");
         registration.addEventListener("updatefound", () =>
           registration.installing?.addEventListener("statechange", () => {
             if (
