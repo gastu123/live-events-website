@@ -1,5 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const apiBase = (document.querySelector('meta[name="public-api-base-url"]')?.content || "").replace(/\/$/, "");
+  const rawApiBase = document.querySelector('meta[name="public-api-base-url"]')?.content || "";
+  const fallbackApiBase = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    ? window.location.origin
+    : "https://live-events-website.onrender.com";
+  const apiBase = (rawApiBase && !rawApiBase.includes("__PUBLIC_API_BASE_URL__") ? rawApiBase : fallbackApiBase).replace(/\/$/, "");
   const pages = [...document.querySelectorAll("[data-page]")];
   const state = { eventId: "", sectionId: "", orderNumber: "", orderAccessToken: "", sectionName: "", ticketPrice: 0, ticketQuantity: 1, currency: "USD", paymentMethod: "paypal" };
   const api = async (path, options = {}, guest = false) => {

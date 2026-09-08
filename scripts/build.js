@@ -15,18 +15,22 @@ for (const [name, definition] of builds) {
   fs.rmSync(definition.destination, { recursive: true, force: true });
   fs.mkdirSync(path.dirname(definition.destination), { recursive: true });
   fs.cpSync(definition.source, definition.destination, { recursive: true });
+
+  const replacePlaceholder = (token, value) => {
+    const indexPath = path.join(definition.destination, "index.html");
+    const html = fs.readFileSync(indexPath, "utf8");
+    const replaced = html.replaceAll(token, value);
+    fs.writeFileSync(indexPath, replaced);
+  };
+
   if (name === "admin") {
     JSON.parse(fs.readFileSync(path.join(definition.source, "admin-manifest.json"), "utf8"));
     const apiBase = String(process.env.ADMIN_API_BASE_URL || productionApiBase).replace(/\/$/, "");
-    const indexPath = path.join(definition.destination, "index.html");
-    const html = fs.readFileSync(indexPath, "utf8").replace("__ADMIN_API_BASE_URL__", apiBase);
-    fs.writeFileSync(indexPath, html);
+    replacePlaceholder("__ADMIN_API_BASE_URL__", apiBase);
   }
   if (name === "public") {
     const apiBase = String(process.env.PUBLIC_API_BASE_URL || productionApiBase).replace(/\/$/, "");
-    const indexPath = path.join(definition.destination, "index.html");
-    const html = fs.readFileSync(indexPath, "utf8").replace("__PUBLIC_API_BASE_URL__", apiBase);
-    fs.writeFileSync(indexPath, html);
+    replacePlaceholder("__PUBLIC_API_BASE_URL__", apiBase);
   }
   console.log(`${name} deployment package built (${definition.required.length} validated assets).`);
 }
