@@ -1,6 +1,6 @@
 "use strict";
 
-const CACHE = "live-public-static-v1";
+const CACHE = "live-public-static-v2";
 const STATIC_ASSETS = [
   "./",
   "./index.html",
