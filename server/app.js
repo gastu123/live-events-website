@@ -112,7 +112,7 @@ export function createApp({ config, db, logger, services = {} }) {
     csrf,
     publicRoutes({ db, auth, publicLimiter, config }),
   );
-  app.use("/api/v1/admin", standard, csrf, adminRoutes({ db, auth, config }));
+  app.use("/api/v1/admin", standard, adminRoutes({ db, auth, config }));
   app.get("/admin.html", (_req, res) => {
     res.set("X-Robots-Tag", "noindex, nofollow, noarchive");
     res.redirect(302, "/admin-site/");
