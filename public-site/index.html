@@ -743,22 +743,7 @@
           </div>
         </div>
         <div class="container page-content">
-          <form class="form-card" id="guest-order-access-form">
-            <h2>Check your order</h2>
-            <p>Enter your order reference and access code to view the latest status and payment instructions.</p>
-            <div class="form-grid">
-              <label
-                ><span>Order reference</span
-                ><input name="order-reference" required autocomplete="off"
-              /></label>
-              <label
-                ><span>Order access code</span
-                ><input name="order-access-token" required autocomplete="off"
-              /></label>
-            </div>
-            <button class="button button-primary" type="submit">Check order</button>
-          </form>
-          <div id="payment-center-status" aria-live="polite"></div>
+          <div id="payment-center-status" aria-live="polite">Loading your current order...</div>
           <div id="payment-center-list" class="payment-center-list" aria-live="polite"></div>
         </div>
       </section>

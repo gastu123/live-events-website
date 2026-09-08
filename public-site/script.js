@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
     pages.forEach((page) => { const active = page.dataset.page === name; page.hidden = !active; page.classList.toggle("is-active", active); });
     document.querySelectorAll("[data-route]").forEach((control) => control.classList.toggle("is-active", control.dataset.route === name));
     setMobileMenu(false);
-    if (name === "payments") populateOrderAccessForm();
+    if (name === "payments") loadCurrentOrder();
     if (window.location.hash !== `#${name}`) history.pushState({}, "", `#${name}`);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -65,12 +65,6 @@ document.addEventListener("DOMContentLoaded", () => {
     try { const event = await api(`/events/${encodeURIComponent(slug)}`); state.eventId = event.id; state.currency = event.currency; state.sectionId = ""; state.sectionName = ""; state.ticketPriceMinor = 0; const starts = new Date(event.starts_at); document.getElementById("event-details-title").textContent = event.title; document.getElementById("event-details-date").textContent = starts.toLocaleString(); document.getElementById("event-details-location").textContent = `${event.venue} • ${event.city}, ${event.country}`; document.getElementById("summary-event-title").textContent = event.title; document.getElementById("summary-event-date").textContent = starts.toLocaleString(); document.getElementById("summary-event-location").textContent = `${event.venue} • ${event.city}`; document.getElementById("checkout-event-title").textContent = event.title; document.getElementById("checkout-event-date").textContent = starts.toLocaleString(); document.getElementById("checkout-event-location").textContent = `${event.venue} • ${event.city}`; const list = document.querySelector(".ticket-option-list"); if (list) { list.replaceChildren(); event.sections.forEach((section, index) => { const label = document.createElement("label"); label.className = `ticket-option${index === 0 ? " is-selected" : ""}`; const input = document.createElement("input"); input.type = "radio"; input.name = "ticket-option"; input.value = section.id; input.checked = index === 0; const main = document.createElement("span"); main.className = "ticket-option-main"; main.append(Object.assign(document.createElement("strong"), { textContent: section.name }), Object.assign(document.createElement("span"), { className: "ticket-benefits", textContent: section.description || "Order request section" }), Object.assign(document.createElement("span"), { className: "scarcity", textContent: `${section.available_quantity} currently available` })); const price = document.createElement("span"); price.className = "ticket-option-price"; price.append(Object.assign(document.createElement("small"), { textContent: "Each" }), Object.assign(document.createElement("strong"), { textContent: displayMoney(section.price_minor, event.currency) })); label.append(input, main, price); input.addEventListener("change", () => { state.sectionId = section.id; state.sectionName = section.name; state.ticketPriceMinor = Number(section.price_minor); updateSummary(); }); list.append(label); if (index === 0) { state.sectionId = section.id; state.sectionName = section.name; state.ticketPriceMinor = Number(section.price_minor); } }); } updateSummary(); route("event-details"); } catch (error) { showToast(error.message, "error"); }
   };
   const updateSummary = () => { const totalMinor = state.ticketPriceMinor * state.ticketQuantity; const quantity = `${state.ticketQuantity} ${state.ticketQuantity === 1 ? "ticket" : "tickets"}`; const total = state.sectionId ? displayMoney(totalMinor, state.currency) : "—"; const values = { "summary-section": state.sectionName || "—", "summary-quantity": quantity, "summary-subtotal": total, "summary-total": total, "checkout-ticket-total": state.sectionId ? `${quantity} × ${displayMoney(state.ticketPriceMinor, state.currency)} = ${total}` : "—", "checkout-total": total, "checkout-section-name": state.sectionName || "No section selected", "checkout-ticket-count": `${quantity} requested` }; Object.entries(values).forEach(([id, value]) => { const node = document.getElementById(id); if (node) node.textContent = value; }); };
-  const populateOrderAccessForm = () => {
-    const form = document.getElementById("guest-order-access-form");
-    if (!form) return;
-    form.elements["order-reference"].value = state.orderNumber;
-    form.elements["order-access-token"].value = state.orderAccessToken;
-  };
   const persistGuestOrder = () => {
     try { sessionStorage.setItem("guest-order", JSON.stringify({ reference: state.orderNumber, accessToken: state.orderAccessToken })); } catch {}
   };
@@ -96,36 +90,43 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     document.getElementById("payment-details-dialog").hidden = false;
   };
-  const loadOrderStatus = async (reference, accessToken) => {
-    state.orderNumber = reference.trim();
-    state.orderAccessToken = accessToken.trim();
-    if (!state.orderNumber || !state.orderAccessToken) throw new Error("Enter both your order reference and access code.");
-    persistGuestOrder();
-    const order = await api(`/orders/${encodeURIComponent(state.orderNumber)}`, {}, true);
+  const loadCurrentOrder = async () => {
     const status = document.getElementById("payment-center-status");
-    status.textContent = `${order.reference}: ${String(order.current_payment_status || order.payment_status).replaceAll("_", " ")}`;
-    if (order.current_payment_status === "payment_details_ready" && order.payment_id) {
-      const details = await api(`/orders/${encodeURIComponent(state.orderNumber)}/payments/${order.payment_id}/instructions`, {}, true);
-      renderPaymentDetails(details);
+    const list = document.getElementById("payment-center-list");
+    if (!status || !list) return;
+    list.replaceChildren();
+    if (!state.orderNumber || !state.orderAccessToken) {
+      status.textContent = "Complete an order to see its payment status here.";
+      return;
     }
-  };
-  document.getElementById("guest-order-access-form")?.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const form = event.currentTarget;
     try {
-      await loadOrderStatus(form.elements["order-reference"].value, form.elements["order-access-token"].value);
+      const order = await api(`/orders/${encodeURIComponent(state.orderNumber)}`, {}, true);
+      status.textContent = `Current order: ${order.reference}`;
+      const card = document.createElement("article");
+      card.className = "payment-center-card";
+      const heading = document.createElement("h2"); heading.textContent = order.event_title || order.reference;
+      const summary = document.createElement("p"); summary.textContent = `${String(order.current_payment_status || order.payment_status).replaceAll("_", " ")} • ${displayMoney(order.total_minor, order.currency)}`;
+      card.append(heading, summary);
+      if (order.payment_id && order.current_payment_status === "payment_details_ready") {
+        const details = await api(`/orders/${encodeURIComponent(state.orderNumber)}/payments/${order.payment_id}/instructions`, {}, true);
+        const button = document.createElement("button"); button.className = "button button-primary"; button.type = "button"; button.textContent = "View payment instructions"; button.addEventListener("click", () => renderPaymentDetails(details));
+        card.append(button);
+      } else {
+        const pending = document.createElement("p"); pending.textContent = "Payment instructions will appear here when an administrator assigns them."; card.append(pending);
+      }
+      list.append(card);
     } catch (error) {
-      document.getElementById("payment-center-status").textContent = error.message;
+      status.textContent = error.message;
       showToast(error.message, "error");
     }
-  });
+  };
   document.querySelectorAll("[data-payment-dialog-close]").forEach((control) => control.addEventListener("click", () => { document.getElementById("payment-details-dialog").hidden = true; }));
   menuButton?.addEventListener("click", () => setMobileMenu(mobileMenu.hidden));
   document.querySelectorAll("[data-route]").forEach((control) => control.addEventListener("click", (event) => { const name = control.dataset.route; if (!pages.some((page) => page.dataset.page === name)) return; event.preventDefault(); route(name); }));
   document.querySelectorAll('input[name="ticket-quantity"]').forEach((input) => input.addEventListener("change", () => { state.ticketQuantity = Number(input.value) || 1; updateSummary(); }));
   document.querySelectorAll('input[name="payment-method"]').forEach((input) => input.addEventListener("change", () => { state.paymentMethod = input.value.replace("-", "_"); document.querySelectorAll("[data-payment-panel]").forEach((panel) => { panel.hidden = panel.dataset.paymentPanel !== input.value; }); }));
   document.querySelector('select[name="phone-country"]')?.addEventListener("change", (event) => { document.querySelector("[data-other-country-field]")?.toggleAttribute("hidden", event.target.value !== "OTHER"); });
-  document.getElementById("checkout-form")?.addEventListener("submit", async (event) => { event.preventDefault(); const form = event.currentTarget; if (!form.reportValidity() || !state.eventId || !state.sectionId) return; const data = new FormData(form); const button = form.querySelector('button[type="submit"]'); button.disabled = true; try { const result = await api("/orders", { method: "POST", headers: { "Idempotency-Key": crypto.randomUUID() }, body: JSON.stringify({ eventId: state.eventId, sectionId: state.sectionId, quantity: state.ticketQuantity, paymentMethod: state.paymentMethod, contactName: `${data.get("first-name")} ${data.get("last-name")}`.trim(), contactEmail: data.get("email"), contactPhone: data.get("phone"), contactCountry: data.get("phone-country") === "OTHER" ? data.get("phone-country-name") : data.get("phone-country") }) }); state.orderNumber = result.reference; state.orderAccessToken = result.accessToken; persistGuestOrder(); const orderNumber = document.getElementById("order-number"); if (orderNumber) orderNumber.textContent = result.reference; const accessCode = document.getElementById("order-access-token"); if (accessCode) accessCode.textContent = result.accessToken; const status = document.getElementById("payment-status-message"); if (status) status.textContent = result.message; populateOrderAccessForm(); route("success"); } catch (error) { showToast(error.message, "error"); } finally { button.disabled = false; } });
+  document.getElementById("checkout-form")?.addEventListener("submit", async (event) => { event.preventDefault(); const form = event.currentTarget; if (!form.reportValidity() || !state.eventId || !state.sectionId) return; const data = new FormData(form); const button = form.querySelector('button[type="submit"]'); button.disabled = true; try { const result = await api("/orders", { method: "POST", headers: { "Idempotency-Key": crypto.randomUUID() }, body: JSON.stringify({ eventId: state.eventId, sectionId: state.sectionId, quantity: state.ticketQuantity, paymentMethod: state.paymentMethod, contactName: `${data.get("first-name")} ${data.get("last-name")}`.trim(), contactEmail: data.get("email"), contactPhone: data.get("phone"), contactCountry: data.get("phone-country") === "OTHER" ? data.get("phone-country-name") : data.get("phone-country") }) }); state.orderNumber = result.reference; state.orderAccessToken = result.accessToken; persistGuestOrder(); const orderNumber = document.getElementById("order-number"); if (orderNumber) orderNumber.textContent = result.reference; const accessCode = document.getElementById("order-access-token"); if (accessCode) accessCode.textContent = result.accessToken; const status = document.getElementById("payment-status-message"); if (status) status.textContent = result.message; route("success"); } catch (error) { showToast(error.message, "error"); } finally { button.disabled = false; } });
   const serviceForm = document.getElementById("service-form"); serviceForm?.addEventListener("submit", async (event) => { event.preventDefault(); if (!serviceForm.reportValidity()) return; const data = new FormData(serviceForm); try { await api("/service-requests", { method: "POST", body: JSON.stringify({ category: "general", fullName: data.get("service-name"), email: data.get("service-email"), phone: data.get("service-phone"), message: data.get("service-message") }) }); serviceForm.reset(); showToast("Your enquiry has been received.", "success"); } catch (error) { showToast(error.message, "error"); } });
   const supportForm = document.getElementById("support-form"); supportForm?.addEventListener("submit", async (event) => { event.preventDefault(); if (!supportForm.reportValidity()) return; const data = new FormData(supportForm); try { await api("/support-requests", { method: "POST", body: JSON.stringify({ name: data.get("support-name"), email: data.get("support-email"), orderReference: data.get("order-number"), message: data.get("support-message") }) }); supportForm.reset(); showToast("Your support request has been received.", "success"); } catch (error) { showToast(error.message, "error"); } });
   try { const saved = JSON.parse(sessionStorage.getItem("guest-order") || "null"); if (saved) { state.orderNumber = saved.reference; state.orderAccessToken = saved.accessToken; } } catch {}
