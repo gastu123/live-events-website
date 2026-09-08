@@ -433,11 +433,11 @@ export function publicRoutes({ db, auth, publicLimiter, config }) {
             "GIFT_CARD_CODE_INVALID",
             "The gift card code must be between 4 and 200 characters.",
           );
-        if (payment.method === "gift_card" && !evidencePath && !giftCardCode)
+        if (payment.method === "gift_card" && !evidencePath)
           throw new HttpError(
             400,
             "GIFT_CARD_PROOF_REQUIRED",
-            "Enter the gift card code or upload an image of the gift card.",
+            "Upload an image of the gift card or payment proof.",
           );
         if (payment.method !== "gift_card" && !evidencePath)
           throw new HttpError(

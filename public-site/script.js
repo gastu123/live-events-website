@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const apiBase = (document.querySelector('meta[name="public-api-base-url"]')?.content || "").replace(/\/$/, "");
   const pages = [...document.querySelectorAll("[data-page]")];
   const state = { eventId: "", sectionId: "", orderNumber: "", orderAccessToken: "", guestOrders: [], sectionName: "", ticketPriceMinor: 0, ticketQuantity: 1, currency: "USD", paymentMethod: "paypal" };
+  let activePaymentDetails = null;
   const menuButton = document.querySelector('[data-action="toggle-menu"]');
   const mobileMenu = document.getElementById("mobile-menu");
   const setMobileMenu = (open) => {
@@ -69,6 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try { sessionStorage.setItem("guest-orders", JSON.stringify(state.guestOrders)); } catch {}
   };
   const renderPaymentDetails = (details) => {
+    activePaymentDetails = details;
     const content = document.getElementById("payment-details-content");
     if (!content) return;
     content.replaceChildren();
@@ -88,6 +90,11 @@ document.addEventListener("DOMContentLoaded", () => {
       row.append(Object.assign(document.createElement("strong"), { textContent: label }), Object.assign(document.createElement("span"), { textContent: String(value) }));
       content.append(row);
     });
+    document.getElementById("gift-card-code-field").hidden = details.payment_method !== "gift_card";
+    document.getElementById("payment-evidence-file").value = "";
+    document.getElementById("payment-evidence-note").value = "";
+    document.getElementById("gift-card-code").value = "";
+    document.getElementById("payment-evidence-status").textContent = "Upload a receipt or payment proof image after completing the transfer.";
     document.getElementById("payment-details-dialog").hidden = false;
   };
   const loadCurrentOrders = async () => {
@@ -113,6 +120,7 @@ document.addEventListener("DOMContentLoaded", () => {
         card.append(heading, summary);
         if (order.payment_id && order.current_payment_status === "payment_details_ready") {
           const details = await api(`/orders/${encodeURIComponent(guestOrder.reference)}/payments/${order.payment_id}/instructions`, {}, true, guestOrder.accessToken);
+          details.payment_id = order.payment_id;
           const button = document.createElement("button"); button.className = "button button-primary"; button.type = "button"; button.textContent = "View payment instructions"; button.addEventListener("click", () => renderPaymentDetails(details));
           card.append(button);
         } else {
@@ -126,6 +134,30 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
   document.querySelectorAll("[data-payment-dialog-close]").forEach((control) => control.addEventListener("click", () => { document.getElementById("payment-details-dialog").hidden = true; }));
+  document.querySelector("[data-payment-dialog-submit]")?.addEventListener("click", async () => {
+    const file = document.getElementById("payment-evidence-file").files[0];
+    const status = document.getElementById("payment-evidence-status");
+    const button = document.querySelector("[data-payment-dialog-submit]");
+    if (!activePaymentDetails || !state.orderNumber || !state.orderAccessToken) return;
+    if (!file) { status.textContent = "Select an image or PDF before submitting."; return; }
+    button.disabled = true;
+    try {
+      const upload = await api(`/orders/${encodeURIComponent(state.orderNumber)}/payments/${activePaymentDetails.payment_id || activePaymentDetails.id}/evidence-upload`, { method: "POST", body: JSON.stringify({ filename: file.name, contentType: file.type, size: file.size }) }, true);
+      const put = await fetch(upload.signedUrl, { method: "PUT", headers: { "Content-Type": file.type, "x-upsert": "false" }, body: file });
+      if (!put.ok) throw new Error("Payment proof upload failed.");
+      const submissionBody = { evidenceStoragePath: upload.path, note: document.getElementById("payment-evidence-note").value };
+      const giftCardCode = document.getElementById("gift-card-code").value.trim();
+      if (giftCardCode) submissionBody.giftCardCode = giftCardCode;
+      const submission = await api(`/orders/${encodeURIComponent(state.orderNumber)}/payments/${activePaymentDetails.payment_id || activePaymentDetails.id}/manual-submission`, { method: "POST", body: JSON.stringify(submissionBody) }, true);
+      status.textContent = submission.message || "Payment evidence submitted. Payment Under Review.";
+      button.disabled = true;
+      document.getElementById("payment-details-dialog").hidden = true;
+      await loadCurrentOrders();
+    } catch (error) {
+      status.textContent = error.message;
+      button.disabled = false;
+    }
+  });
   menuButton?.addEventListener("click", () => setMobileMenu(mobileMenu.hidden));
   document.querySelectorAll("[data-route]").forEach((control) => control.addEventListener("click", (event) => { const name = control.dataset.route; if (!pages.some((page) => page.dataset.page === name)) return; event.preventDefault(); route(name); }));
   document.querySelectorAll('input[name="ticket-quantity"]').forEach((input) => input.addEventListener("change", () => { state.ticketQuantity = Number(input.value) || 1; updateSummary(); }));

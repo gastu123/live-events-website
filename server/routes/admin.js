@@ -1041,7 +1041,7 @@ export function adminRoutes({ db, auth, config }) {
         if (
           !payment ||
           payment.provider !== "manual" ||
-          !["awaiting_payment_details", "payment_details_expired"].includes(
+          !["awaiting_payment_details", "payment_details_expired", "rejected"].includes(
             payment.status,
           )
         )
@@ -1074,9 +1074,9 @@ export function adminRoutes({ db, auth, config }) {
               req.admin.id,
               paymentMethod,
               paymentMethod === "bank_transfer" ? bankName : null,
-              paymentMethod === "bank_transfer" ? accountName : null,
+              paymentMethod === "gift_card" ? null : accountName,
               paymentMethod === "bank_transfer" ? accountNumber : null,
-              paymentMethod === "bank_transfer" ? null : paymentIdentifier,
+              paymentMethod === "gift_card" ? null : paymentIdentifier,
               paymentReference,
               payment.amount_minor,
               payment.currency,
