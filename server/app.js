@@ -52,6 +52,7 @@ export function createApp({ config, db, logger, services = {} }) {
       allowedHeaders: [
         "Content-Type",
         "X-CSRF-Token",
+        "X-Auth-Transport",
         "Idempotency-Key",
         "X-Request-ID",
       ],
