@@ -21,11 +21,13 @@ export function createAuth(config, db) {
     config.SUPABASE_SERVICE_ROLE_KEY,
     { auth: { persistSession: false, autoRefreshToken: false } },
   );
-  const cookieNames = (kind) => kind === "admin"
-    ? { access: "admin_access_token", refresh: "admin_refresh_token", csrf: "admin_csrf" }
-    : { access: "customer_access_token", refresh: "customer_refresh_token", csrf: "customer_csrf" };
-  const setSession = (res, session, kind = "customer") => {
-    const names = cookieNames(kind);
+  const cookieNames = {
+    access: "admin_access_token",
+    refresh: "admin_refresh_token",
+    csrf: "admin_csrf",
+  };
+  const setSession = (res, session) => {
+    const names = cookieNames;
     res.cookie(names.access, session.access_token, cookieOptions(config));
     res.cookie(names.refresh, session.refresh_token, {
       ...cookieOptions(config),
@@ -43,8 +45,8 @@ export function createAuth(config, db) {
     });
     return csrfToken;
   };
-  const clearSession = (res, kind = "customer") => {
-    const names = cookieNames(kind);
+  const clearSession = (res) => {
+    const names = cookieNames;
     [names.access, names.refresh, names.csrf].forEach((name) =>
       res.clearCookie(name, {
         path: "/",
@@ -76,24 +78,6 @@ export function createAuth(config, db) {
         "ADMIN_IP_RESTRICTED",
         "Administrator access is not allowed from this network.",
       );
-  };
-  const requireUser = async (req, _res, next) => {
-    try {
-      const token = req.cookies.customer_access_token;
-      if (!token)
-        throw new HttpError(401, "AUTH_REQUIRED", "Authentication required.");
-      const { data, error } = await service.auth.getUser(token);
-      if (error || !data.user)
-        throw new HttpError(
-          401,
-          "SESSION_INVALID",
-          "Session is invalid or expired.",
-        );
-      req.user = data.user;
-      next();
-    } catch (error) {
-      next(error);
-    }
   };
   const requireAdmin =
     (permissions = []) =>
@@ -152,7 +136,6 @@ export function createAuth(config, db) {
     service,
     setSession,
     clearSession,
-    requireUser,
     requireAdmin,
     validateAdminNetwork,
   };

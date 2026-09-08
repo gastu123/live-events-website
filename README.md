@@ -1,12 +1,12 @@
 # Live Events platform
 
-Black-and-red responsive public ticket-ordering, membership and services site with a separately protected administration dashboard. This phase accepts pending order requests and verifies payment; it deliberately stops before ticket fulfilment.
+Black-and-red responsive public ticket-ordering and services site with a separately protected administration dashboard. Customers place guest orders and receive payment instructions through an order access token; the system deliberately stops before ticket fulfilment.
 
 ## Structure
 
 - `index.html`, `style.css`, `script.js` — public UI and API client
 - `admin.html`, `admin.css`, `admin.js` — private admin UI and API client
-- `server/` — Express application, security middleware, Supabase Auth integration, PostgreSQL access, routes and payment adapters
+- `server/` — Express application, security middleware, administrator Supabase Auth integration, PostgreSQL access, routes and payment adapters
 - `server/routes/` — versioned auth, public and admin endpoints mounted below `/api/v1`
 - `server/payments/manual.js` — manual-review boundary used by every payment method
 - `supabase/migrations/` — schema, constraints, RLS and hold-expiry function
@@ -58,7 +58,7 @@ psql $env:DATABASE_URL -v ON_ERROR_STOP=1 -f supabase/migrations/005_payment_exp
 psql $env:DATABASE_URL -v ON_ERROR_STOP=1 -f supabase/seed.sql
 ```
 
-Enable the optional `pg_cron` extension and schedule `select public.release_expired_order_holds()` every minute plus `select public.expire_memberships()` daily, or invoke both from a trusted scheduled server job. Create the `manual-payment-evidence` Storage bucket as private. Do not add public policies; evidence access uses customer-bound signed upload URLs and short-lived admin-authorised signed read URLs.
+Enable the optional `pg_cron` extension and schedule `select public.release_expired_order_holds()` every minute, or invoke it from a trusted scheduled server job. Create the `manual-payment-evidence` Storage bucket as private. Do not add public policies; evidence access uses guest-order signed upload URLs and short-lived administrator-authorised signed read URLs.
 
 ## Secure first Super Administrator
 
@@ -75,9 +75,9 @@ Migration `006_admin_security_and_recovery.sql` permits multiple Super Administr
 
 All JSON routes are under `/api/v1` and return `{ success, data|error, requestId }`.
 
-Public/auth: `GET /health`, `/config`; `POST /auth/register`, `/auth/login`, `/auth/admin/login`, `/auth/refresh`, `/auth/logout`, `/auth/forgot-password`, `/auth/reset-password`, `/auth/verify-email`, `/auth/password-reset-session`; `GET/PATCH /auth/me`; `GET /events`, `/events/:slug`; `POST /orders`, `/membership-applications`, `/service-requests`, `/support-requests`, `/account/payments/:id/evidence-upload`, `/account/payments/:id/manual-submission`, `/account/payments/:id/request-fresh-instructions`; `GET /account/notifications`, `/account/orders`, `/account/payments/:id/instructions`, `/account/membership-applications`, `/account/service-requests`.
+Public: `GET /health`, `/config`; `GET /events`, `/events/:slug`; `POST /orders`, `/service-requests`, `/support-requests`; guest order access uses `X-Order-Access-Token` with `/orders/:reference` and `/orders/:reference/payments/:id/*`. Public customer account, membership and password routes are not mounted.
 
-Admin: `GET /admin/overview`, `/admin/events`, `/admin/events/:id/sections`, `/admin/orders`, `/admin/payments`, `/admin/payments/:id/evidence`, `/admin/members`, `/admin/membership-applications`, `/admin/service-requests`, `/admin/admins`, `/admin/roles`, `/admin/notifications`, `/admin/settings`, `/admin/audit-logs`; `POST /admin/events`, `/admin/events/:id/status`, `/admin/events/:id/sections`, `/admin/payments/:id/assign-details`, `/admin/payments/:id/confirm`, `/admin/payments/:id/reject`, `/admin/membership-applications/:id/decision`, `/admin/admins/invite`, `/admin/notifications/:id/read`; `PATCH /admin/events/:id`, `/admin/sections/:id/inventory`, `/admin/service-requests/:id`, `/admin/admins/:id/role`, `/admin/settings`; `DELETE /admin/admins/:id`.
+Admin: `GET /admin/overview`, `/admin/events`, `/admin/events/:id/sections`, `/admin/orders`, `/admin/payments`, `/admin/payments/:id/evidence`, `/admin/service-requests`, `/admin/admins`, `/admin/roles`, `/admin/notifications`, `/admin/settings`, `/admin/audit-logs`; `POST /admin/events`, `/admin/events/:id/status`, `/admin/events/:id/sections`, `/admin/payments/:id/assign-details`, `/admin/payments/:id/confirm`, `/admin/payments/:id/reject`, `/admin/admins/invite`, `/admin/notifications/:id/read`; `PATCH /admin/events/:id`, `/admin/sections/:id/inventory`, `/admin/service-requests/:id`, `/admin/admins/:id/role`, `/admin/settings`; `DELETE /admin/admins/:id`.
 
 Automatic payment capture and webhook routes are intentionally not mounted.
 
@@ -85,13 +85,13 @@ Automatic payment capture and webhook routes are intentionally not mounted.
 
 ### Payment-state workflow
 
-Customers must sign in before checkout so assigned details can be restricted to the order owner. Orders are inserted as `pending_payment` and immediately moved to `awaiting_payment_details`. An authorized administrator enters the transaction-specific method, account name, receiving identifier, exact server-calculated amount and currency, unique customer reference, optional instructions and expiry time. Only the authenticated order owner can retrieve an active assignment.
+Customers do not create accounts. Orders are inserted as `pending_payment` and immediately moved to `awaiting_payment_details`. Each order receives a random access token whose hash is stored with the order; the token is returned once and is required to retrieve assigned payment details or submit proof. An authorized administrator enters the transaction-specific method, account name, receiving identifier, exact server-calculated amount and currency, unique customer reference, optional instructions and expiry time.
 
 The customer transfers money outside the website, returns, selects **I have made the payment**, and submits the proof requested for the assigned method. Gift Card payments accept a card image, a code, or both; other manual methods accept an uploaded receipt. That submission moves the order to `pending_verification`; the proof never proves receipt. An authorized administrator must inspect the actual receiving account and deliberately confirm or reject the payment. Confirmation is the only transition to `payment_successful`, where processing stops. Expired details can be replaced on the same order without duplicating checkout.
 
 PayPal, Cash App, Chime, bank transfer and gift card all use this manual off-website workflow. No PayPal or Paystack credentials, hosted checkout, callbacks, webhooks or automatic verification are required or exposed.
 
-Account assignment, customer submission, evidence access, confirmation, rejection, administrator identity, timestamps and status transitions are audited. Sensitive assignment fields are excluded from audit metadata and general payment lists. Receipt malware scanning must mark quarantined evidence `clean` before an administrator can open it.
+Guest order assignment, customer submission, evidence access, confirmation, rejection, administrator identity, timestamps and status transitions are audited. Sensitive assignment fields are excluded from audit metadata and general payment lists. Receipt malware scanning must mark quarantined evidence `clean` before an administrator can open it.
 
 Checkout totals are recalculated using a locked database inventory row; browser totals are ignored. `Idempotency-Key` is required. Inventory holds do not represent tickets.
 

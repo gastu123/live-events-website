@@ -14,18 +14,17 @@ document.addEventListener("DOMContentLoaded", () => {
     confirmMessage = document.getElementById("confirm-message"),
     confirmButton = document.getElementById("confirm-action-button");
   const pages = new Map(
-    [...document.querySelectorAll("[data-admin-page]")].map((page) => [
+    [...document.querySelectorAll("[data-admin-page]")].filter((page) => !["members", "applications"].includes(page.dataset.adminPage)).map((page) => [
       page.dataset.adminPage,
       page,
     ]),
   );
+  document.querySelectorAll('[data-admin-page="members"],[data-admin-page="applications"]').forEach((node) => node.remove());
   const names = {
     overview: "Overview",
     orders: "Orders",
     tickets: "Ticket Inventory",
     events: "Events",
-    members: "Members",
-    applications: "Applications",
     payments: "Payments",
     services: "Service Requests",
     team: "Admin Team",
@@ -369,7 +368,6 @@ document.addEventListener("DOMContentLoaded", () => {
     [
       ["nav-pending-orders", data.pending_orders],
       ["nav-pending-payments", data.pending_payments],
-      ["nav-pending-applications", data.pending_applications],
     ].forEach(([id, count]) => {
       const badge = document.getElementById(id);
       if (!badge) return;
@@ -387,7 +385,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const metrics = [
         ["Pending orders", data.pending_orders],
         ["Successful payments", data.successful_payments],
-        ["Membership reviews", data.pending_applications],
         ["Open services", data.open_services],
       ];
       page.replaceChildren(
@@ -563,74 +560,6 @@ document.addEventListener("DOMContentLoaded", () => {
           button("+ Create event", "create-event", "primary-button"),
         ),
         grid,
-      );
-    },
-    async members(page) {
-      const rows = await api("/admin/members");
-      page.replaceChildren(
-        heading(
-          "MEMBERSHIP",
-          names.members,
-          "Approved membership records and expiry dates.",
-        ),
-        panel(
-          table(
-            ["Member", "Status", "Starts", "Expires"],
-            rows.map((row) => [
-              row.full_name || "Unlinked applicant",
-              status(row.status),
-              date(row.starts_at),
-              date(row.expires_at),
-            ]),
-          ),
-        ),
-      );
-    },
-    async applications(page) {
-      const rows = await api("/admin/membership-applications");
-      const reviewableStatuses = new Set(["pending", "on_hold"]);
-      page.replaceChildren(
-        heading(
-          "MEMBERSHIP REVIEW",
-          names.applications,
-          "Review applications independently from ticket ordering.",
-        ),
-        el(
-          "div",
-          { class: "application-queue" },
-          rows.length ? rows.map((row) =>
-            el(
-              "article",
-              { class: "application-review-card" },
-              el(
-                "div",
-                { class: "application-person" },
-                el(
-                  "div",
-                  {},
-                  el("h3", { text: row.full_name }),
-                  el("p", { text: `${row.email} • ${row.country}` }),
-                ),
-                status(row.status),
-              ),
-              el(
-                "div",
-                { class: "application-answer" },
-                el("small", { text: "REASON" }),
-                el("p", { text: row.reason }),
-              ),
-              reviewableStatuses.has(row.status)
-                ? el(
-                    "div",
-                    { class: "review-actions" },
-                    button("Decline", "membership-decision", "danger-button", { id: row.id, decision: "declined" }),
-                    button("Hold", "membership-decision", "secondary-button", { id: row.id, decision: "on_hold" }),
-                    button("Approve", "membership-decision", "primary-button", { id: row.id, decision: "approved" }),
-                  )
-                : el("p", { class: "panel-description", text: "Review complete." }),
-            ),
-          ) : [panel(el("p", { text: "No membership applications yet." }))],
-        ),
       );
     },
     async payments(page) {
@@ -1129,7 +1058,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (action === "delete-event")
       return confirm(
         "Delete event",
-        `Archive ${control.dataset.title || "this event"}? Existing members, applications and payments will not be changed.`,
+        `Archive ${control.dataset.title || "this event"}? Existing payments will not be changed.`,
         () => mutate(`/admin/events/${control.dataset.id}`, {}, "events", "Event deleted.", "DELETE"),
         "Delete",
       );
@@ -1192,23 +1121,6 @@ document.addEventListener("DOMContentLoaded", () => {
         "tickets",
         "Inventory updated.",
         "PATCH",
-      );
-    }
-    if (action === "membership-decision") {
-      const values = await promptFields(
-        [["notes", "Internal review notes (optional)", "", "textarea"]],
-        "Membership decision",
-        "Continue",
-      );
-      if (!values) return;
-      const body = { decision: control.dataset.decision };
-      if (values.notes) body.notes = values.notes;
-      return mutate(
-        `/admin/membership-applications/${control.dataset.id}/decision`,
-        body,
-        "applications",
-        "Membership decision recorded.",
-        "POST",
       );
     }
     if (action === "manual-payment") {

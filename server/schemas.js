@@ -56,18 +56,6 @@ export const orderInput = z.object({
   contactPhone: z.string().trim().min(7).max(20).optional(),
   contactCountry: phoneCountry.optional(),
 });
-export const membershipInput = z.object({
-  fullName: z.string().min(2).max(120),
-  email: z.string().email(),
-  country: z.string().length(2),
-  reason: z.string().min(10).max(3000),
-  interest: z.enum([
-    "exclusive_content",
-    "meet_and_greet",
-    "merchandise",
-    "general_membership",
-  ]),
-});
 export const newsletterInput = z.object({
   email: z
     .string()

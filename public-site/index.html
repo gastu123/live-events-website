@@ -6,12 +6,12 @@
     <meta name="public-api-base-url" content="__PUBLIC_API_BASE_URL__" />
     <meta
       name="description"
-      content="Discover live events, purchase verified tickets and apply for exclusive membership."
+      content="Discover live events and purchase verified tickets."
     />
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="icon" href="assets/public-icons/live-events-192.png" type="image/png" />
     <link rel="apple-touch-icon" href="assets/public-icons/live-events-192.png" />
-    <title>Live Events | Tickets & Membership</title>
+    <title>Live Events | Tickets</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -38,9 +38,6 @@
         <nav class="desktop-nav" aria-label="Main navigation">
           <a href="#home" data-route="home" class="nav-link is-active">Home</a>
           <a href="#events" data-route="events" class="nav-link">Events</a>
-          <a href="#membership" data-route="membership" class="nav-link"
-            >Membership</a
-          >
           <a href="#payments" data-route="payments" class="nav-link" data-payment-nav hidden
             >Payments <span class="payment-badge" data-payment-badge hidden>0</span></a
           >
@@ -59,10 +56,7 @@
           >
             <span aria-hidden="true">⌕</span>
           </button>
-          <div class="account-actions" id="account-actions">
-            <button class="account-button" type="button" data-action="open-login" data-account-nav="login">Sign In</button>
-            <button class="account-button" type="button" data-action="open-register" data-account-nav="login">Create Account</button>
-            <button class="account-button" id="account-menu-button" type="button" data-route="account" hidden>Profile</button>
+          <div class="account-actions">
             <button class="account-button install-button" type="button" data-action="install-pwa">Install App</button>
           </div>
           <button
@@ -88,14 +82,11 @@
       >
         <a href="#home" data-route="home">Home</a>
         <a href="#events" data-route="events">Events</a>
-        <a href="#membership" data-route="membership">Membership</a>
         <a href="#payments" data-route="payments" data-payment-nav hidden
           >Payments <span class="payment-badge" data-payment-badge hidden>0</span></a
         >
         <a href="#services" data-route="services">Services</a>
         <a href="#support" data-route="support">Support</a>
-        <a href="#account" data-route="account" data-account-nav="login">Sign In / Create Account</a>
-        <a href="#account" data-route="account" data-account-nav="profile" hidden>Profile</a>
         <button class="account-button install-button" type="button" data-action="install-pwa">Install App</button>
       </nav>
     </header>
@@ -119,8 +110,7 @@
             <p class="eyebrow">THE LIVE EXPERIENCE</p>
             <h1 id="home-title">Live. Unfiltered.<br />Unforgettable.</h1>
             <p class="hero-copy">
-              Official tickets, exclusive memberships and unforgettable live
-              experiences—all in one place.
+              Official tickets and unforgettable live experiences—all in one place.
             </p>
             <div class="hero-actions">
               <button
@@ -129,14 +119,6 @@
                 data-route="events"
               >
                 Get tickets
-              </button>
-              <button
-                class="button button-outline"
-                type="button"
-                data-route="membership"
-                data-membership-cta
-              >
-                Join membership
               </button>
             </div>
             <ul class="trust-list" aria-label="Purchase benefits">
@@ -217,29 +199,6 @@
               </div>
             </article>
           </div>
-        </section>
-
-        <section
-          class="membership-banner container"
-          aria-labelledby="home-membership-title"
-        >
-          <div class="membership-icon" aria-hidden="true">M</div>
-          <div class="membership-banner-copy">
-            <p class="eyebrow">EXCLUSIVE ACCESS</p>
-            <h2 id="home-membership-title">Become a member</h2>
-            <p>
-              Get exclusive content, community announcements and selected
-              non-ticket experience updates.
-            </p>
-          </div>
-          <button
-            class="button button-primary"
-            type="button"
-            data-route="membership"
-            data-membership-cta
-          >
-            Join membership
-          </button>
         </section>
 
         <section
@@ -871,167 +830,6 @@
         </div>
       </section>
 
-      <!-- MEMBERSHIP PAGE -->
-      <section
-        class="page"
-        id="page-membership"
-        data-page="membership"
-        aria-labelledby="membership-title"
-        hidden
-      >
-        <div class="page-hero membership-hero">
-          <div class="container">
-            <p class="eyebrow">JOIN THE COMMUNITY</p>
-            <h1 id="membership-title">Join the inner circle</h1>
-            <p>
-              Apply for membership updates, community news and selected
-              non-ticket experiences.
-            </p>
-            <button
-              class="button button-primary"
-              type="button"
-              data-action="scroll-to-application"
-              data-membership-cta
-            >
-              Join membership
-            </button>
-          </div>
-        </div>
-
-        <div class="container page-content">
-          <section aria-labelledby="benefits-title">
-            <div class="section-heading centered">
-              <div>
-                <p class="eyebrow">MEMBER BENEFITS</p>
-                <h2 id="benefits-title">Your access starts here</h2>
-              </div>
-            </div>
-            <div class="benefit-grid">
-              <article>
-                <span class="benefit-number">01</span>
-                <h3>Community updates</h3>
-                <p>Receive news and approved membership announcements.</p>
-              </article>
-              <article>
-                <span class="benefit-number">02</span>
-                <h3>Exclusive content</h3>
-                <p>
-                  Receive members-only updates, behind-the-scenes content and
-                  special releases.
-                </p>
-              </article>
-              <article>
-                <span class="benefit-number">03</span>
-                <h3>Selected experiences</h3>
-                <p>Hear about approved non-ticket community experiences.</p>
-              </article>
-            </div>
-          </section>
-
-          <section
-            class="application-section"
-            id="membership-application"
-            aria-labelledby="application-title"
-          >
-            <div class="application-intro">
-              <p class="eyebrow">APPLICATION</p>
-              <h2 id="application-title">Tell us about yourself</h2>
-              <p>
-                Complete the form below. Our team will review your application
-                and contact you by email.
-              </p>
-            </div>
-            <form class="application-form form-card" id="membership-form">
-              <div class="form-grid">
-                <label
-                  ><span>First name</span
-                  ><input
-                    type="text"
-                    name="member-first-name"
-                    autocomplete="given-name"
-                    required
-                /></label>
-                <label
-                  ><span>Last name</span
-                  ><input
-                    type="text"
-                    name="member-last-name"
-                    autocomplete="family-name"
-                    required
-                /></label>
-                <label class="full-width"
-                  ><span>Email address</span
-                  ><input
-                    type="email"
-                    name="member-email"
-                    autocomplete="email"
-                    required
-                /></label>
-                <label
-                  ><span>Phone number</span
-                  ><input
-                    type="tel"
-                    name="member-phone"
-                    autocomplete="tel"
-                    required
-                /></label>
-                <label
-                  ><span>Country</span
-                  ><select name="member-country" required>
-                    <option value="">Select country</option>
-                    <option>United States</option>
-                    <option>United Kingdom</option>
-                    <option>Canada</option>
-                    <option>Australia</option>
-                    <option>Nigeria</option>
-                    <option value="OTHER">Other</option>
-                  </select></label
-                >
-                <label class="full-width" data-other-country-field hidden
-                  ><span>Enter your country</span
-                  ><input type="text" name="member-country-name" /></label>
-                <label class="full-width"
-                  ><span>Why would you like to become a member?</span
-                  ><textarea
-                    name="membership-reason"
-                    rows="5"
-                    required
-                    placeholder="Tell us briefly..."
-                  ></textarea>
-                </label>
-                <label class="full-width"
-                  ><span>Which experiences interest you?</span
-                  ><select name="membership-interest" required>
-                    <option value="">Select an option</option>
-                    <option value="exclusive_content">Exclusive content</option>
-                    <option value="meet_and_greet">
-                      Meet-and-greet opportunities
-                    </option>
-                    <option value="merchandise">Merchandise</option>
-                    <option value="general_membership">
-                      General membership updates
-                    </option>
-                  </select></label
-                >
-              </div>
-              <label class="terms-check"
-                ><input
-                  type="checkbox"
-                  name="membership-consent"
-                  required
-                /><span
-                  >I agree to receive membership updates and accept the privacy
-                  policy.</span
-                ></label
-              >
-              <button class="button button-primary button-full" type="submit">
-                Submit application
-              </button>
-            </form>
-          </section>
-        </div>
-      </section>
-
       <!-- SERVICES PAGE -->
       <section
         class="page"
@@ -1150,142 +948,6 @@
         </div>
       </section>
 
-      <!-- ACCOUNT PAGE -->
-      <section
-        class="page"
-        id="page-account"
-        data-page="account"
-        aria-labelledby="account-title"
-        hidden
-      >
-        <div class="container account-layout">
-          <div class="account-intro">
-            <p class="eyebrow">WELCOME BACK</p>
-            <h1 id="account-title">Your live experiences, all together.</h1>
-            <p>
-              Sign in to view order and payment status, check applications and
-              manage your details.
-            </p>
-          </div>
-          <div class="auth-card form-card" id="account-auth-card">
-            <div class="auth-tabs" role="tablist" aria-label="Account options">
-              <button
-                type="button"
-                role="tab"
-                aria-selected="true"
-                aria-controls="login-panel"
-                id="login-tab"
-                data-auth-tab="login"
-              >
-                Sign in
-              </button>
-              <button
-                type="button"
-                role="tab"
-                aria-selected="false"
-                aria-controls="register-panel"
-                id="register-tab"
-                data-auth-tab="register"
-              >
-                Create account
-              </button>
-            </div>
-            <form id="login-panel" role="tabpanel" aria-labelledby="login-tab">
-              <label
-                ><span>Email address</span
-                ><input
-                  type="email"
-                  name="login-email"
-                  autocomplete="email"
-                  required
-              /></label>
-              <label
-                ><span>Password</span
-                ><input
-                  type="password"
-                  name="login-password"
-                  autocomplete="current-password"
-                  required
-              /></label>
-              <div class="form-row">
-                <label class="remember-check"
-                  ><input type="checkbox" name="remember" /><span
-                    >Remember me</span
-                  ></label
-                ><button
-                  class="text-link"
-                  type="button"
-                  data-action="forgot-password"
-                >
-                  Forgot password?
-                </button>
-              </div>
-              <button class="button button-primary button-full" type="submit">
-                Sign in
-              </button>
-            </form>
-            <form
-              id="register-panel"
-              role="tabpanel"
-              aria-labelledby="register-tab"
-              hidden
-            >
-              <label
-                ><span>Full name</span
-                ><input
-                  type="text"
-                  name="register-name"
-                  autocomplete="name"
-                  required
-              /></label>
-              <label
-                ><span>Email address</span
-                ><input
-                  type="email"
-                  name="register-email"
-                  autocomplete="email"
-                  required
-              /></label>
-              <label
-                ><span>Password</span
-                ><input
-                  type="password"
-                  name="register-password"
-                  autocomplete="new-password"
-                  minlength="8"
-                  pattern="(?=.*[A-Za-z])(?=.*[0-9]).{8,}"
-                  title="Use at least 8 characters, including a letter and a number."
-                  required
-              /></label>
-              <label class="terms-check"
-                ><input type="checkbox" required /><span
-                  >I agree to the Terms of Service and Privacy Policy.</span
-                ></label
-              >
-              <button class="button button-primary button-full" type="submit">
-                Create account
-              </button>
-            </form>
-          </div>
-          <section
-            class="auth-card form-card"
-            id="account-status"
-            aria-labelledby="account-status-title"
-            hidden
-          >
-            <h2 id="account-status-title">Your account</h2>
-            <div id="account-order-list" aria-live="polite"></div>
-            <button
-              class="button button-outline button-full"
-              type="button"
-              data-action="customer-logout"
-            >
-              Sign out
-            </button>
-          </section>
-        </div>
-      </section>
-
       <!-- PAYMENT CENTER PAGE -->
       <section
         class="page"
@@ -1362,13 +1024,6 @@
                   receiving account can be checked.
                 </p>
               </details>
-              <details>
-                <summary>How do membership applications work?</summary>
-                <p>
-                  Submit the membership form and our team will review it. You
-                  will receive the decision and next steps by email.
-                </p>
-              </details>
             </div>
           </section>
           <form class="support-form form-card" id="support-form">
@@ -1430,11 +1085,6 @@
               Refund, cancellation and rescheduling conditions depend on the
               event and will be presented before purchase.
             </p>
-            <h2>Membership applications</h2>
-            <p>
-              Submitting an application does not guarantee approval. Applicants
-              will be contacted using the details they provide.
-            </p>
           </article>
         </div>
       </section>
@@ -1491,14 +1141,13 @@
             ><span class="brand-name">LIVE</span></a
           >
           <p>
-            Official tickets, exclusive membership and unforgettable live
+            Official tickets and unforgettable live
             experiences.
           </p>
         </div>
         <div>
           <h2>Explore</h2>
           <a href="#events" data-route="events">Events</a
-          ><a href="#membership" data-route="membership">Membership</a
           ><a href="#services" data-route="services">Services</a>
         </div>
         <div>

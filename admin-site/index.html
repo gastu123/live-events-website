@@ -7,7 +7,7 @@
     <meta name="admin-api-base-url" content="__ADMIN_API_BASE_URL__" />
     <meta
       name="description"
-      content="Private administration dashboard for events, tickets and memberships."
+      content="Private administration dashboard for events, tickets and customer requests."
     />
     <title>Admin Dashboard | Live Events</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -43,7 +43,7 @@
         <p class="eyebrow">AUTHORIZED ACCESS ONLY</p>
         <h1 id="admin-login-title">Welcome back</h1>
         <p class="login-copy">
-          Sign in to manage events, orders, members and customer requests.
+          Sign in to manage events, orders and customer requests.
         </p>
         <div id="development-demo-login" class="demo-login-notice" hidden></div>
         <form id="admin-login-form">
@@ -140,17 +140,6 @@
             ><span class="nav-icon" aria-hidden="true">◇</span
             ><span>Events</span></a
           >
-          <a href="#members" class="sidebar-link" data-admin-route="members"
-            ><span class="nav-icon" aria-hidden="true">◎</span
-            ><span>Members</span></a
-          >
-          <a
-            href="#applications"
-            class="sidebar-link"
-            data-admin-route="applications"
-            ><span class="nav-icon" aria-hidden="true">◉</span
-            ><span>Applications</span><span class="nav-count alert" id="nav-pending-applications" hidden></span></a
-          >
 
           <p class="nav-label">Operations</p>
           <a href="#payments" class="sidebar-link" data-admin-route="payments"
@@ -217,7 +206,7 @@
               ><input
                 type="search"
                 id="admin-global-search"
-                placeholder="Search orders, members..."
+                placeholder="Search orders..."
               /><span aria-hidden="true">⌕</span></label
             >
             <button
@@ -302,13 +291,6 @@
               </article>
               <article class="metric-card">
                 <div class="metric-head">
-                  <span>Active members</span><span class="metric-icon">◎</span>
-                </div>
-                <strong>1,284</strong>
-                <p><span class="trend up">↑ 7.2%</span> this month</p>
-              </article>
-              <article class="metric-card">
-                <div class="metric-head">
                   <span>Pending reviews</span><span class="metric-icon">◉</span>
                 </div>
                 <strong>13</strong>
@@ -337,11 +319,7 @@
                   ><span><i class="legend-dot ticket-dot"></i>Ticket sales</span
                   ><span><i class="legend-dot member-dot"></i>Membership</span>
                 </div>
-                <div
-                  class="bar-chart"
-                  role="img"
-                  aria-label="Ticket and membership sales chart for seven days"
-                >
+                  <div class="bar-chart" role="img" aria-label="Ticket sales chart for seven days">
                   <div class="chart-column">
                     <span
                       ><i style="height: 52%"></i
@@ -458,14 +436,14 @@
                       <th>Tickets</th>
                       <th>Payment</th>
                       <th>Total</th>
-                      <th>Status</th>
-                      <th><span class="sr-only">Actions</span></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>
-                        <strong>#LIVE-834296</strong
+                    <li>
+                      <span class="activity-icon member">◎</span>
+                      <div>
+                        <strong>Membership approved</strong>
+                        <p>Daniel Brooks is now an active member</p>
+                        <small>18 minutes ago</small>
+                      </div>
+                    </li>
                         ><small>Sep 3, 2:41 PM</small>
                       </td>
                       <td>Emily Carter<small>emily@example.com</small></td>

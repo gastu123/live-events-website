@@ -4,58 +4,11 @@ import { asyncRoute, HttpError, ok } from "../http.js";
 import {
   credentials,
   parse,
-  profile,
   strongPassword,
 } from "../schemas.js";
 
 export function authRoutes({ auth, db, loginLimiter, mailer, config, csrfMiddleware }) {
   const router = Router();
-  router.post(
-    "/register",
-    loginLimiter,
-    asyncRoute(async (req, res) => {
-      const input = parse(
-        credentials.merge(profile.pick({ fullName: true })),
-        req.body,
-      );
-      const { data, error } = await auth.anon.auth.signUp({
-        email: input.email,
-        password: input.password,
-        options: { data: { full_name: input.fullName } },
-      });
-      if (error) throw new HttpError(400, "REGISTRATION_FAILED", error.message);
-      ok(
-        res,
-        { userId: data.user?.id, emailVerificationRequired: !data.session },
-        201,
-      );
-    }),
-  );
-  router.post(
-    "/login",
-    loginLimiter,
-    asyncRoute(async (req, res) => {
-      const input = parse(credentials, req.body);
-      const { data, error } = await auth.anon.auth.signInWithPassword(input);
-      if (error || !data.session)
-        throw new HttpError(
-          401,
-          "LOGIN_FAILED",
-          "Email or password is incorrect.",
-        );
-      const adminAccount = (await db.query(
-        "select id from admin_users where profile_id=$1 and deleted_at is null",
-        [data.user.id],
-      )).rows[0];
-      if (adminAccount)
-        throw new HttpError(401, "LOGIN_FAILED", "Email or password is incorrect.");
-      const csrfToken = auth.setSession(res, data.session, "customer");
-      ok(res, {
-        user: { id: data.user.id, email: data.user.email },
-        csrfToken,
-      });
-    }),
-  );
   router.post(
     "/admin/login",
     loginLimiter,
@@ -111,9 +64,8 @@ export function authRoutes({ auth, db, loginLimiter, mailer, config, csrfMiddlew
       });
     }),
   );
-  const refresh = (kind) => asyncRoute(async (req, res) => {
-      const refreshCookie = kind === "admin" ? "admin_refresh_token" : "customer_refresh_token";
-      const refreshToken = req.cookies[refreshCookie] || String(req.body?.refreshToken || "");
+    const refresh = asyncRoute(async (req, res) => {
+      const refreshToken = req.cookies.admin_refresh_token || String(req.body?.refreshToken || "");
       if (!refreshToken)
         throw new HttpError(
           401,
@@ -127,7 +79,7 @@ export function authRoutes({ auth, db, loginLimiter, mailer, config, csrfMiddlew
         throw new HttpError(401, "REFRESH_FAILED", "Session refresh failed.");
       const bearerFallback = req.get("x-auth-transport") === "bearer-fallback";
       ok(res, {
-        csrfToken: auth.setSession(res, data.session, kind),
+        csrfToken: auth.setSession(res, data.session),
         ...(bearerFallback
           ? {
               accessToken: data.session.access_token,
@@ -136,8 +88,7 @@ export function authRoutes({ auth, db, loginLimiter, mailer, config, csrfMiddlew
           : {}),
       });
     });
-  router.post("/refresh", refresh("customer"));
-  router.post("/admin/refresh", refresh("admin"));
+  router.post("/admin/refresh", refresh);
   const recoveryResponse = {
     accepted: true,
     message: "If the recovery details match an active administrator, a verification code will be sent.",
@@ -281,140 +232,15 @@ export function authRoutes({ auth, db, loginLimiter, mailer, config, csrfMiddlew
       ok(res, { updated: true, sessionsRevoked: true });
     }),
   );
-  const logout = (kind) => asyncRoute(async (req, res) => {
-      const accessCookie = kind === "admin" ? "admin_access_token" : "customer_access_token";
-      const accessToken = req.cookies[accessCookie] || req.get("authorization")?.match(/^Bearer\s+(.+)$/i)?.[1];
+  const logout = asyncRoute(async (req, res) => {
+      const accessToken = req.cookies.admin_access_token || req.get("authorization")?.match(/^Bearer\s+(.+)$/i)?.[1];
       if (accessToken)
         await auth.service.auth.admin.signOut(accessToken).catch(() => {});
-      auth.clearSession(res, kind);
+      auth.clearSession(res);
       res.set("Clear-Site-Data", '"cache"');
       ok(res, { loggedOut: true });
     });
-  router.post("/logout", logout("customer"));
-  router.post("/admin/logout", logout("admin"));
-  router.post(
-    "/forgot-password",
-    loginLimiter,
-    asyncRoute(async (req, res) => {
-      const email = zEmail(req.body?.email);
-      const { error } = await auth.anon.auth.resetPasswordForEmail(email, {
-        redirectTo: `${config.PUBLIC_ORIGIN}/#account`,
-      });
-      if (error)
-        throw new HttpError(
-          502,
-          "PASSWORD_RESET_REQUEST_FAILED",
-          "Password-reset instructions could not be requested right now. Please try again later.",
-        );
-      ok(res, { accepted: true });
-    }),
-  );
-  router.post(
-    "/reset-password",
-    auth.requireUser,
-    asyncRoute(async (req, res) => {
-      const password = parse(
-        credentials.pick({ password: true }),
-        req.body,
-      ).password;
-      if (password !== req.body?.confirmPassword)
-        throw new HttpError(400, "PASSWORD_MISMATCH", "Password and Confirm Password must match.");
-      const { error } = await auth.service.auth.admin.updateUserById(
-        req.user.id,
-        { password },
-      );
-      if (error) throw new HttpError(400, "RESET_FAILED", error.message);
-      await auth.service.auth.admin.signOut(req.cookies.customer_access_token, "global").catch(() => {});
-      auth.clearSession(res, "customer");
-      ok(res, { updated: true, sessionsRevoked: true });
-    }),
-  );
-  router.post(
-    "/verify-email",
-    loginLimiter,
-    asyncRoute(async (req, res) => {
-      const tokenHash = String(req.body?.tokenHash || "");
-      const { data, error } = await auth.anon.auth.verifyOtp({
-        token_hash: tokenHash,
-        type: "email",
-      });
-      if (error || !data.session)
-        throw new HttpError(
-          400,
-          "EMAIL_VERIFICATION_FAILED",
-          "Email verification link is invalid or expired.",
-        );
-      ok(res, {
-        verified: true,
-        csrfToken: auth.setSession(res, data.session, "customer"),
-      });
-    }),
-  );
-  router.post(
-    "/password-reset-session",
-    loginLimiter,
-    asyncRoute(async (req, res) => {
-      const tokenHash = String(req.body?.tokenHash || "");
-      const accessToken = String(req.body?.accessToken || "");
-      const refreshToken = String(req.body?.refreshToken || "");
-      let session;
-      if (tokenHash) {
-        const { data, error } = await auth.anon.auth.verifyOtp({
-          token_hash: tokenHash,
-          type: "recovery",
-        });
-        session = data.session;
-        if (error || !session) session = null;
-      } else if (accessToken && refreshToken) {
-        const { data, error } = await auth.service.auth.getUser(accessToken);
-        session = error || !data.user
-          ? null
-          : { access_token: accessToken, refresh_token: refreshToken, expires_in: 3600 };
-      }
-      if (!session)
-        throw new HttpError(
-          400,
-          "RESET_LINK_INVALID",
-          "Password-reset link is invalid or expired.",
-        );
-      const adminAccount = (
-        await db.query(
-          "select 1 from admin_users where profile_id=$1 and deleted_at is null",
-          [(await auth.service.auth.getUser(session.access_token)).data.user?.id],
-        )
-      ).rows[0];
-      if (adminAccount)
-        throw new HttpError(400, "RESET_LINK_INVALID", "Password-reset link is invalid or expired.");
-      ok(res, { ready: true, csrfToken: auth.setSession(res, session, "customer") });
-    }),
-  );
-  router.get(
-    "/me",
-    auth.requireUser,
-    asyncRoute(async (req, res) => {
-      const row = (
-        await db.query(
-          "select id, full_name, phone, country from profiles where id=$1 and deleted_at is null",
-          [req.user.id],
-        )
-      ).rows[0];
-      ok(res, { ...row, email: req.user.email });
-    }),
-  );
-  router.patch(
-    "/me",
-    auth.requireUser,
-    asyncRoute(async (req, res) => {
-      const input = parse(profile.partial(), req.body);
-      const row = (
-        await db.query(
-          "update profiles set full_name=coalesce($2,full_name),phone=coalesce($3,phone),country=coalesce($4,country),updated_at=now() where id=$1 returning id,full_name,phone,country",
-          [req.user.id, input.fullName, input.phone, input.country],
-        )
-      ).rows[0];
-      ok(res, row);
-    }),
-  );
+  router.post("/admin/logout", logout);
   return router;
 }
 function secretHash(secret, value) {

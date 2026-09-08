@@ -19,8 +19,6 @@ const required = [
   "payments",
   "manual_payment_submissions",
   "payment_webhook_events",
-  "membership_applications",
-  "memberships",
   "service_requests",
   "customer_support_requests",
   "notifications",

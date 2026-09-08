@@ -8,7 +8,6 @@ import { createApp } from "../server/app.js";
 import {
   credentials,
   eventInput,
-  membershipInput,
   orderInput,
   serviceInput,
   supportInput,
@@ -152,17 +151,6 @@ test("order validation accepts every supported off-site transfer method", () => 
       true,
     );
 });
-test("membership validation excludes ticket benefits", () =>
-  assert.equal(
-    membershipInput.safeParse({
-      fullName: "Test User",
-      email: "a@b.com",
-      country: "US",
-      reason: "A sufficiently long reason",
-      interest: "early_ticket_access",
-    }).success,
-    false,
-  ));
 test("service validation rejects unknown categories", () =>
   assert.equal(
     serviceInput.safeParse({

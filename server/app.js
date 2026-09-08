@@ -54,6 +54,7 @@ export function createApp({ config, db, logger, services = {} }) {
         "X-CSRF-Token",
         "X-Auth-Transport",
         "Authorization",
+        "X-Order-Access-Token",
         "Idempotency-Key",
         "X-Request-ID",
       ],

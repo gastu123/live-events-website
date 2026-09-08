@@ -14,18 +14,17 @@ document.addEventListener("DOMContentLoaded", () => {
     confirmMessage = document.getElementById("confirm-message"),
     confirmButton = document.getElementById("confirm-action-button");
   const pages = new Map(
-    [...document.querySelectorAll("[data-admin-page]")].map((page) => [
+    [...document.querySelectorAll("[data-admin-page]")].filter((page) => !["members", "applications"].includes(page.dataset.adminPage)).map((page) => [
       page.dataset.adminPage,
       page,
     ]),
   );
+  document.querySelectorAll('[data-admin-route="members"],[data-admin-route="applications"],[data-admin-page="members"],[data-admin-page="applications"]').forEach((node) => node.remove());
   const names = {
     overview: "Overview",
     orders: "Orders",
     tickets: "Ticket Inventory",
     events: "Events",
-    members: "Members",
-    applications: "Applications",
     payments: "Payments",
     services: "Service Requests",
     team: "Admin Team",
@@ -284,7 +283,6 @@ document.addEventListener("DOMContentLoaded", () => {
     [
       ["nav-pending-orders", data.pending_orders],
       ["nav-pending-payments", data.pending_payments],
-      ["nav-pending-applications", data.pending_applications],
     ].forEach(([id, count]) => {
       const badge = document.getElementById(id);
       if (!badge) return;
@@ -302,7 +300,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const metrics = [
         ["Pending orders", data.pending_orders],
         ["Successful payments", data.successful_payments],
-        ["Membership reviews", data.pending_applications],
         ["Open services", data.open_services],
       ];
       page.replaceChildren(

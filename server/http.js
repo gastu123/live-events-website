@@ -24,12 +24,10 @@ export function requestId(req, res, next) {
 export function csrf(req, _res, next) {
   if (["GET", "HEAD", "OPTIONS"].includes(req.method)) return next();
   const adminRoute = req.path.startsWith("/admin") || req.path.startsWith("/auth/admin");
-  if (adminRoute && /^Bearer\s+/i.test(req.get("authorization") || "")) return next();
-  const accessCookie = adminRoute ? "admin_access_token" : "customer_access_token";
-  const csrfCookie = adminRoute ? "admin_csrf" : "customer_csrf";
-  if (!req.cookies[accessCookie]) return next();
+  if (!adminRoute || /^Bearer\s+/i.test(req.get("authorization") || "")) return next();
+  if (!req.cookies.admin_access_token) return next();
   const token = req.get("x-csrf-token");
-  if (!token || token !== req.cookies[csrfCookie])
+  if (!token || token !== req.cookies.admin_csrf)
     return next(new HttpError(403, "CSRF_INVALID", "Invalid CSRF token."));
   next();
 }

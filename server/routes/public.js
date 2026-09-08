@@ -3,7 +3,6 @@ import crypto from "node:crypto";
 import { processEvidenceSubmission } from "../scanning/evidence.js";
 import { asyncRoute, HttpError, ok } from "../http.js";
 import {
-  membershipInput,
   newsletterInput,
   orderInput,
   parse,
@@ -13,11 +12,27 @@ import {
 
 export function publicRoutes({ db, auth, publicLimiter, config }) {
   const router = Router();
-  const optionalUserId = async (req) =>
-    req.cookies.customer_access_token
-      ? (await auth.service.auth.getUser(req.cookies.customer_access_token)).data.user
-          ?.id || null
+  const guestAccess = (req) => {
+    const token = String(req.get("x-order-access-token") || "");
+    const reference = String(req.params.reference || "");
+    if (!token || !reference) return null;
+    return {
+      reference,
+      hash: crypto.createHash("sha256").update(token).digest("hex"),
+    };
+  };
+  const requireGuestOrder = async (req) => {
+    const access = guestAccess(req);
+    const order = access
+      ? (await db.query(
+          "select id,reference from orders where reference=$1 and guest_access_token_hash=$2",
+          [access.reference, access.hash],
+        )).rows[0]
       : null;
+    if (!order)
+      throw new HttpError(401, "ORDER_ACCESS_REQUIRED", "Order access is invalid or expired.");
+    return order;
+  };
   router.get("/config", (_req, res) =>
     ok(res, {
       payments: {
@@ -88,13 +103,11 @@ export function publicRoutes({ db, auth, publicLimiter, config }) {
           "IDEMPOTENCY_KEY_REQUIRED",
           "A valid Idempotency-Key header is required.",
         );
-      const userId = await optionalUserId(req);
-      if (!userId)
-        throw new HttpError(
-          401,
-          "AUTHENTICATION_REQUIRED",
-          "Sign in before submitting an order so only you can view its payment details.",
-        );
+      const accessToken = crypto.randomBytes(32).toString("base64url");
+      const accessTokenHash = crypto
+        .createHash("sha256")
+        .update(accessToken)
+        .digest("hex");
       const order = await db.transaction(async (client) => {
         const existing = (
           await client.query(
@@ -102,7 +115,15 @@ export function publicRoutes({ db, auth, publicLimiter, config }) {
             [key],
           )
         ).rows[0];
-        if (existing) return existing;
+        if (existing) {
+          const refreshed = (
+            await client.query(
+              "update orders set guest_access_token_hash=$2 where id=$1 returning id,reference,status,payment_status,total_minor,currency,hold_expires_at",
+              [existing.id, accessTokenHash],
+            )
+          ).rows[0];
+          return refreshed || existing;
+        }
         const section = (
           await client.query(
             `select es.id,es.event_id,es.price_minor,e.currency,e.status,ti.available_quantity,ti.held_quantity,ti.sold_quantity from event_sections es join events e on e.id=es.event_id join ticket_inventory ti on ti.section_id=es.id where es.id=$1 and es.event_id=$2 and es.deleted_at is null and e.deleted_at is null for update of ti`,
@@ -130,9 +151,8 @@ export function publicRoutes({ db, auth, publicLimiter, config }) {
         const reference = `ORD-${crypto.randomBytes(5).toString("hex").toUpperCase()}`;
         const inserted = (
           await client.query(
-            `insert into orders(profile_id,event_id,reference,status,payment_status,currency,subtotal_minor,total_minor,contact_name,contact_email,contact_phone,contact_country,checkout_idempotency_key,hold_expires_at) values($1,$2,$3,'pending_payment','pending',$4,$5,$5,$6,$7,$8,$9,$10,now()+interval '15 minutes') returning id,reference,status,payment_status,total_minor,currency,hold_expires_at`,
+            `insert into orders(profile_id,event_id,reference,status,payment_status,currency,subtotal_minor,total_minor,contact_name,contact_email,contact_phone,contact_country,checkout_idempotency_key,hold_expires_at,guest_access_token_hash) values(null,$1,$2,'pending_payment','pending',$3,$4,$4,$5,$6,$7,$8,$9,now()+interval '15 minutes',$10) returning id,reference,status,payment_status,total_minor,currency,hold_expires_at`,
             [
-              userId,
               input.eventId,
               reference,
               section.currency,
@@ -142,6 +162,7 @@ export function publicRoutes({ db, auth, publicLimiter, config }) {
               input.contactPhone,
               input.contactCountry,
               key,
+              accessTokenHash,
             ],
           )
         ).rows[0];
@@ -188,7 +209,7 @@ export function publicRoutes({ db, auth, publicLimiter, config }) {
           [
             inserted.id,
             res.locals.requestId,
-            { profileId: userId, paymentMethod: input.paymentMethod },
+            { guestOrder: true, paymentMethod: input.paymentMethod },
           ],
         );
         return inserted;
@@ -202,6 +223,7 @@ export function publicRoutes({ db, auth, publicLimiter, config }) {
           total_minor: order.total_minor,
           currency: order.currency,
           hold_expires_at: order.hold_expires_at,
+          accessToken,
           message:
             "Preparing your payment details. An administrator has been notified and your payment instructions will appear here shortly.",
         },
@@ -252,43 +274,14 @@ export function publicRoutes({ db, auth, publicLimiter, config }) {
     }),
   );
   router.post(
-    "/membership-applications",
-    publicLimiter,
-    auth.requireUser,
-    asyncRoute(async (req, res) => {
-      const i = parse(membershipInput, req.body);
-      if (i.email.toLowerCase() !== req.user.email.toLowerCase())
-        throw new HttpError(
-          400,
-          "APPLICATION_EMAIL_MISMATCH",
-          "Use the email address connected to your signed-in account.",
-        );
-      const profileId = req.user.id;
-      const row = (
-        await db.query(
-          `insert into membership_applications(profile_id,full_name,email,country,reason,interest,status) values($1,$2,$3,$4,$5,$6,'pending') on conflict (lower(email)) where status in ('pending','on_hold') do nothing returning id,status,created_at`,
-          [profileId, i.fullName, i.email, i.country, i.reason, i.interest],
-        )
-      ).rows[0];
-      if (!row)
-        throw new HttpError(
-          409,
-          "APPLICATION_EXISTS",
-          "An active application already exists for this email.",
-        );
-      ok(res, row, 201);
-    }),
-  );
-  router.post(
     "/service-requests",
     publicLimiter,
     asyncRoute(async (req, res) => {
       const i = parse(serviceInput, req.body);
-      const profileId = await optionalUserId(req);
       const row = (
         await db.query(
           "insert into service_requests(profile_id,category,full_name,email,phone,message,status) values($1,$2,$3,$4,$5,$6,'new') returning id,status,created_at",
-          [profileId, i.category, i.fullName, i.email, i.phone, i.message],
+          [null, i.category, i.fullName, i.email, i.phone, i.message],
         )
       ).rows[0];
       ok(res, row, 201);
@@ -301,12 +294,11 @@ export function publicRoutes({ db, auth, publicLimiter, config }) {
       const i = parse(supportInput, req.body);
       if (i.website)
         throw new HttpError(400, "SPAM_REJECTED", "Request rejected.");
-      const profileId = await optionalUserId(req);
       const row = (
         await db.query(
           "insert into customer_support_requests(profile_id,name,email,order_reference,message,status,ip_hash) values($1,$2,$3,$4,$5,'new',$6) returning id,created_at",
           [
-            profileId,
+            null,
             i.name,
             i.email,
             i.orderReference,
@@ -322,47 +314,30 @@ export function publicRoutes({ db, auth, publicLimiter, config }) {
     }),
   );
   router.get(
-    "/account/notifications",
-    auth.requireUser,
-    asyncRoute(async (req, res) =>
-      ok(
-        res,
-        (
-          await db.query(
-            "select id,kind,title,body,read_at,created_at from notifications where profile_id=$1 order by created_at desc limit 50",
-            [req.user.id],
-          )
-        ).rows,
-      ),
-    ),
-  );
-  router.get(
-    "/account/orders",
-    auth.requireUser,
-    asyncRoute(async (req, res) =>
-      ok(
-        res,
-        (
-          await db.query(
-            "select o.reference,o.status,o.payment_status,o.total_minor,o.currency,o.created_at,e.title event_title,e.venue event_venue,e.city event_city,e.starts_at event_starts_at,p.id payment_id,p.method,p.status current_payment_status from orders o join events e on e.id=o.event_id left join lateral(select id,method,status from payments where order_id=o.id order by created_at desc limit 1)p on true where o.profile_id=$1 order by o.created_at desc",
-            [req.user.id],
-          )
-        ).rows,
-      ),
-    ),
-  );
-  router.get(
-    "/account/payments/:id/instructions",
-    auth.requireUser,
+    "/orders/:reference",
     asyncRoute(async (req, res) => {
+      const order = await requireGuestOrder(req);
+      const row = (
+        await db.query(
+          "select o.reference,o.status,o.payment_status,o.total_minor,o.currency,o.created_at,e.title event_title,e.venue event_venue,e.city event_city,e.starts_at event_starts_at,p.id payment_id,p.method,p.status current_payment_status from orders o join events e on e.id=o.event_id left join lateral(select id,method,status from payments where order_id=o.id order by created_at desc limit 1)p on true where o.id=$1",
+          [order.id],
+        )
+      ).rows[0];
+      ok(res, row);
+    }),
+  );
+  router.get(
+    "/orders/:reference/payments/:id/instructions",
+    asyncRoute(async (req, res) => {
+      const order = await requireGuestOrder(req);
       await db.query("select public.expire_payment_assignments()");
       const row = (
         await db.query(
           `select pa.id assignment_id,pa.payment_method,pa.bank_name,pa.account_name,pa.account_number,pa.payment_identifier,
                   pa.instructions,pa.payment_reference,pa.amount_minor,pa.currency,pa.status,pa.expires_at
            from payment_assignments pa join orders o on o.id=pa.order_id
-           where pa.payment_id=$1 and o.profile_id=$2 and pa.status in ('active','submitted')`,
-          [req.params.id, req.user.id],
+           where pa.payment_id=$1 and o.id=$2 and pa.status in ('active','submitted')`,
+          [req.params.id, order.id],
         )
       ).rows[0];
       if (!row)
@@ -375,15 +350,15 @@ export function publicRoutes({ db, auth, publicLimiter, config }) {
     }),
   );
   router.post(
-    "/account/payments/:id/request-fresh-instructions",
-    auth.requireUser,
+    "/orders/:reference/payments/:id/request-fresh-instructions",
     asyncRoute(async (req, res) => {
+      const order = await requireGuestOrder(req);
       const row = (
         await db.query(
           `update payments p set status='awaiting_payment_details',updated_at=now()
-           from orders o where p.id=$1 and o.id=p.order_id and o.profile_id=$2
+           from orders o where p.id=$1 and o.id=p.order_id and o.id=$2
            and p.provider='manual' and p.status='payment_details_expired' returning p.order_id`,
-          [req.params.id, req.user.id],
+          [req.params.id, order.id],
         )
       ).rows[0];
       if (!row)
@@ -401,7 +376,7 @@ export function publicRoutes({ db, auth, publicLimiter, config }) {
       );
       await db.query(
         "insert into audit_logs(action,entity_type,entity_id,request_id,metadata) values('payment.fresh_details_requested','order',$1,$2,$3)",
-        [row.order_id, res.locals.requestId, { profileId: req.user.id }],
+        [row.order_id, res.locals.requestId, { guestOrder: true }],
       );
       ok(res, {
         status: "awaiting_payment_details",
@@ -411,9 +386,9 @@ export function publicRoutes({ db, auth, publicLimiter, config }) {
     }),
   );
   router.post(
-    "/account/payments/:id/manual-submission",
-    auth.requireUser,
+    "/orders/:reference/payments/:id/manual-submission",
     asyncRoute(async (req, res) => {
+      const order = await requireGuestOrder(req);
       const note = String(req.body?.note || "").slice(0, 2000);
       const giftCardCode = String(req.body?.giftCardCode || "").trim();
       const evidencePath = req.body?.evidenceStoragePath
@@ -424,9 +399,9 @@ export function publicRoutes({ db, auth, publicLimiter, config }) {
           await c.query(
              `select p.id,p.order_id,p.provider,p.method,p.status,pa.id assignment_id
              from payments p join orders o on o.id=p.order_id
-             join payment_assignments pa on pa.payment_id=p.id and pa.status='active' and pa.expires_at>now()
-             where p.id=$1 and o.profile_id=$2 for update of p`,
-            [req.params.id, req.user.id],
+              join payment_assignments pa on pa.payment_id=p.id and pa.status='active' and pa.expires_at>now()
+              where p.id=$1 and o.id=$2 for update of p`,
+              [req.params.id, order.id],
           )
         ).rows[0];
         if (!payment)
@@ -470,10 +445,7 @@ export function publicRoutes({ db, auth, publicLimiter, config }) {
             "EVIDENCE_REQUIRED",
             "Upload payment proof before submitting for verification.",
           );
-        if (
-          evidencePath &&
-          !evidencePath.startsWith(`${req.user.id}/${payment.id}/`)
-        )
+          if (evidencePath && !evidencePath.startsWith(`guest/${order.id}/${payment.id}/`))
           throw new HttpError(
             400,
             "EVIDENCE_PATH_INVALID",
@@ -515,7 +487,7 @@ export function publicRoutes({ db, auth, publicLimiter, config }) {
             payment.id,
             res.locals.requestId,
             {
-              profileId: req.user.id,
+              guestOrder: true,
               assignmentId: payment.assignment_id,
             },
           ],
@@ -539,13 +511,13 @@ export function publicRoutes({ db, auth, publicLimiter, config }) {
     }),
   );
   router.post(
-    "/account/payments/:id/evidence-upload",
-    auth.requireUser,
+    "/orders/:reference/payments/:id/evidence-upload",
     asyncRoute(async (req, res) => {
+      const order = await requireGuestOrder(req);
       const payment = (
         await db.query(
-          "select p.id from payments p join orders o on o.id=p.order_id where p.id=$1 and o.profile_id=$2 and p.provider='manual'",
-          [req.params.id, req.user.id],
+           "select p.id from payments p join orders o on o.id=p.order_id where p.id=$1 and o.id=$2 and p.provider='manual'",
+          [req.params.id, order.id],
         )
       ).rows[0];
       if (!payment)
@@ -569,7 +541,7 @@ export function publicRoutes({ db, auth, publicLimiter, config }) {
           "EVIDENCE_INVALID",
           "Evidence must be a PNG, JPEG, WebP or PDF no larger than 5 MB.",
         );
-      const storagePath = `${req.user.id}/${payment.id}/${crypto.randomUUID()}-${filename}`;
+      const storagePath = `guest/${order.id}/${payment.id}/${crypto.randomUUID()}-${filename}`;
       const { data, error } = await auth.service.storage
         .from(config.MANUAL_PAYMENT_EVIDENCE_BUCKET)
         .createSignedUploadUrl(storagePath);
@@ -592,40 +564,6 @@ export function publicRoutes({ db, auth, publicLimiter, config }) {
         ],
       });
     }),
-  );
-  router.get(
-    "/account/membership-applications",
-    auth.requireUser,
-    asyncRoute(async (req, res) =>
-      ok(
-        res,
-        (
-          await db.query(
-            `select a.id,a.status,a.created_at,a.reviewed_at,
-              m.status membership_status,m.starts_at membership_starts_at,m.expires_at membership_expires_at
-             from membership_applications a
-             left join memberships m on m.application_id=a.id
-             where a.profile_id=$1 order by a.created_at desc`,
-            [req.user.id],
-          )
-        ).rows,
-      ),
-    ),
-  );
-  router.get(
-    "/account/service-requests",
-    auth.requireUser,
-    asyncRoute(async (req, res) =>
-      ok(
-        res,
-        (
-          await db.query(
-            "select id,category,status,created_at,updated_at from service_requests where profile_id=$1 order by created_at desc",
-            [req.user.id],
-          )
-        ).rows,
-      ),
-    ),
   );
   return router;
 }

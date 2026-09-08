@@ -46,7 +46,7 @@ export function adminRoutes({ db, auth, config }) {
     asyncRoute(async (_req, res) => {
       const x = (
         await db.query(
-          `select (select count(*) from orders where status in ('pending_payment','awaiting_payment_details','payment_details_ready','pending_verification')) pending_orders,(select count(*) from payments where status in ('awaiting_payment_details','payment_details_expired','payment_details_ready','pending_verification')) pending_payments,(select count(*) from payments where status='successful') successful_payments,(select count(*) from membership_applications where status in ('pending','on_hold')) pending_applications,(select count(*) from service_requests where status not in ('archived','resolved')) open_services`,
+          `select (select count(*) from orders where status in ('pending_payment','awaiting_payment_details','payment_details_ready','pending_verification')) pending_orders,(select count(*) from payments where status in ('awaiting_payment_details','payment_details_expired','payment_details_ready','pending_verification')) pending_payments,(select count(*) from payments where status='successful') successful_payments,(select count(*) from service_requests where status not in ('archived','resolved')) open_services`,
         )
       ).rows[0];
       ok(res, x);
@@ -378,43 +378,6 @@ export function adminRoutes({ db, auth, config }) {
           "update payment_assignments set status='completed',updated_at=now() where payment_id=$1 and status='submitted'",
           [p.id],
         );
-        const order = (
-          await c.query(
-            "select id,profile_id from orders where id=$1",
-            [p.order_id],
-          )
-        ).rows[0];
-        if (order?.profile_id) {
-          const application = (
-            await c.query(
-              "select * from membership_applications where profile_id=$1 and status in ('pending','on_hold') order by created_at desc limit 1 for update",
-              [order.profile_id],
-            )
-          ).rows[0];
-          if (application) {
-            await c.query(
-              "update membership_applications set status='approved',reviewed_by=$2,reviewed_at=now(),updated_at=now() where id=$1 returning *",
-              [application.id, req.admin.id],
-            );
-            await c.query(
-              "insert into memberships(profile_id,application_id,status,starts_at,expires_at) values($1,$2,'active',now(),now()+interval '1 year') on conflict(application_id) do update set status='active',starts_at=now(),expires_at=now()+interval '1 year',updated_at=now()",
-              [application.profile_id, application.id],
-            );
-            await c.query(
-              "insert into notifications(profile_id,kind,title,body) values($1,$2,$3,$4)",
-              [
-                application.profile_id,
-                "membership_approved",
-                "Membership approved",
-                "Your membership application was approved. Your membership is now active.",
-              ],
-            );
-          }
-        }
-        await c.query(
-          "insert into notifications(profile_id,kind,title,body) select profile_id,'payment_successful','Payment successful','Your payment has been confirmed by an administrator.' from orders where id=$1 and profile_id is not null",
-          [p.order_id],
-        );
         await audit(
           c,
           req,
@@ -484,89 +447,10 @@ export function adminRoutes({ db, auth, config }) {
           "update payment_assignments set status='rejected',updated_at=now() where payment_id=$1 and status in ('active','submitted')",
           [p.id],
         );
-        await c.query(
-          "insert into notifications(profile_id,kind,title,body) select profile_id,'payment_rejected','Payment not approved','Your payment could not be approved. Review your payment details or contact support.' from orders where id=$1 and profile_id is not null",
-          [p.order_id],
-        );
         await audit(c, req, "payment.manual_reject", "payment", p.id, {
           reason,
         });
         return u;
-      });
-      ok(res, row);
-    }),
-  );
-  r.get(
-    "/membership-applications",
-    auth.requireAdmin(["memberships.read"]),
-    asyncRoute(async (_req, res) =>
-      ok(
-        res,
-        (
-          await db.query(
-            "select * from membership_applications order by created_at desc",
-          )
-        ).rows,
-      ),
-    ),
-  );
-  r.post(
-    "/membership-applications/:id/decision",
-    auth.requireAdmin(["memberships.write"]),
-    asyncRoute(async (req, res) => {
-      uuid.parse(req.params.id);
-      const decision = String(req.body?.decision);
-      if (!["approved", "declined", "on_hold"].includes(decision))
-        throw new HttpError(400, "DECISION_INVALID", "Decision is invalid.");
-      const notes = String(req.body?.notes || "").trim();
-      const storedNotes = notes ? notes.slice(0, 5000) : null;
-      const row = await db.transaction(async (c) => {
-        const a = (
-          await c.query(
-            "update membership_applications set status=$2,internal_notes=$3,reviewed_by=$4,reviewed_at=now(),updated_at=now() where id=$1 and status in ('pending','on_hold') returning *",
-            [req.params.id, decision, storedNotes, req.admin.id],
-          )
-        ).rows[0];
-        if (!a)
-          throw new HttpError(
-            404,
-            "APPLICATION_NOT_FOUND",
-            "Application not found.",
-          );
-        if (decision === "approved") {
-          if (!a.profile_id)
-            throw new HttpError(
-              409,
-              "APPLICATION_NOT_LINKED",
-              "This application is not connected to a customer account.",
-            );
-          await c.query(
-            `insert into memberships(profile_id,application_id,status,starts_at,expires_at)
-             values($1,$2,'active',now(),now()+interval '1 year')
-             on conflict(application_id) do update set status='active',starts_at=now(),expires_at=now()+interval '1 year',updated_at=now()`,
-            [a.profile_id, a.id],
-          );
-        }
-        if (a.profile_id) {
-          const notification = {
-            approved: ["Membership approved", "Your membership application was approved. Your membership is now active."],
-            declined: ["Membership application declined", "Your membership application was declined."],
-            on_hold: ["Membership application on hold", "Your membership application is on hold while it is reviewed."],
-          }[decision];
-          await c.query(
-            "insert into notifications(profile_id,kind,title,body) values($1,$2,$3,$4)",
-            [a.profile_id, `membership_${decision}`, ...notification],
-          );
-        }
-        await audit(
-          c,
-          req,
-          `membership.${decision}`,
-          "membership_application",
-          a.id,
-          storedNotes ? { reason: storedNotes } : {},
-        );
-        return a;
       });
       ok(res, row);
     }),
@@ -867,20 +751,6 @@ export function adminRoutes({ db, auth, config }) {
         (
           await db.query(
             "select * from audit_logs order by created_at desc limit 500",
-          )
-        ).rows,
-      ),
-    ),
-  );
-  r.get(
-    "/members",
-    auth.requireAdmin(["memberships.read"]),
-    asyncRoute(async (_req, res) =>
-      ok(
-        res,
-        (
-          await db.query(
-            "select m.id,m.profile_id,m.status,m.starts_at,m.expires_at,p.full_name from memberships m left join profiles p on p.id=m.profile_id order by m.created_at desc",
           )
         ).rows,
       ),
