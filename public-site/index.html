@@ -38,7 +38,7 @@
         <nav class="desktop-nav" aria-label="Main navigation">
           <a href="#home" data-route="home" class="nav-link is-active">Home</a>
           <a href="#events" data-route="events" class="nav-link">Events</a>
-          <a href="#payments" data-route="payments" class="nav-link" data-payment-nav hidden
+          <a href="#payments" data-route="payments" class="nav-link" data-payment-nav
             >Payments <span class="payment-badge" data-payment-badge hidden>0</span></a
           >
           <a href="#services" data-route="services" class="nav-link"
@@ -82,7 +82,7 @@
       >
         <a href="#home" data-route="home">Home</a>
         <a href="#events" data-route="events">Events</a>
-        <a href="#payments" data-route="payments" data-payment-nav hidden
+        <a href="#payments" data-route="payments" data-payment-nav
           >Payments <span class="payment-badge" data-payment-badge hidden>0</span></a
         >
         <a href="#services" data-route="services">Services</a>
@@ -591,7 +591,7 @@
             <dl class="summary-lines">
               <div>
                 <dt>Tickets</dt>
-                <dd>2 × $134.00</dd>
+                <dd id="checkout-ticket-total">—</dd>
               </div>
               <div>
                 <dt>Fees</dt>
@@ -599,7 +599,7 @@
               </div>
               <div class="summary-total">
                 <dt>Total</dt>
-                <dd>USD $268.00</dd>
+                <dd id="checkout-total">—</dd>
               </div>
             </dl>
             <button class="text-link" type="button" data-route="event-details">
