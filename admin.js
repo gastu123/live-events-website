@@ -199,7 +199,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const input = el(multiline ? "textarea" : "input", {
           name: key,
           value: initial,
-          required: !/optional/i.test(label) && /reason|name|title|venue|city|country|price|quantity|paymentMethod|accountName|paymentIdentifier|paymentReference|amount|currency|expiresAt|email|phone|status/i.test(key),
+          required: !/optional/i.test(label) && /reason|name|title|venue|city|country|eventDate|eventTime|price|quantity|paymentMethod|accountName|paymentIdentifier|paymentReference|amount|currency|expiresAt|email|phone|status/i.test(key),
         });
         if (!multiline) input.type = type || (/email/i.test(key) ? "email" : /password/i.test(key) ? "password" : "text");
         if (/password/i.test(key)) {
@@ -224,6 +224,17 @@ document.addEventListener("DOMContentLoaded", () => {
       document.body.append(dialog);
       form.querySelector("input,textarea")?.focus();
     });
+  }
+  function eventDateTimeFields(value) {
+    const initial = value ? new Date(value) : new Date(Date.now() + 86400000);
+    const pad = (part) => String(part).padStart(2, "0");
+    return [
+      ["eventDate", "Event date", `${initial.getFullYear()}-${pad(initial.getMonth() + 1)}-${pad(initial.getDate())}`, "date"],
+      ["eventTime", "Event time", `${pad(initial.getHours())}:${pad(initial.getMinutes())}`, "time"],
+    ];
+  }
+  function eventStartsAt(values) {
+    return new Date(`${values.eventDate}T${values.eventTime}`).toISOString();
   }
   pages.forEach((page) =>
     renderState(page, "Sign in to load live administration data."),
@@ -988,18 +999,32 @@ document.addEventListener("DOMContentLoaded", () => {
         ["venue", "Venue"],
         ["city", "City"],
         ["country", "Country code (2 letters)", "NG"],
-        [
-          "startsAt",
-          "Start date/time (ISO)",
-          new Date(Date.now() + 86400000).toISOString(),
-        ],
+        ...eventDateTimeFields(),
         ["currency", "Currency", "USD"],
+        ["sectionName", "First ticket section", "General Admission"],
+        ["sectionDescription", "Section description", "Order-request section"],
+        ["sectionPriceMinor", "Ticket price in smallest currency unit"],
+        ["sectionAvailableQuantity", "Available ticket quantity"],
       ]);
       if (!values) return;
       try {
         await api("/admin/events", {
           method: "POST",
-          body: JSON.stringify({ ...values, description: "" }),
+          body: JSON.stringify({
+            title: values.title,
+            venue: values.venue,
+            city: values.city,
+            country: values.country,
+            startsAt: eventStartsAt(values),
+            currency: values.currency,
+            description: "",
+            section: {
+              name: values.sectionName,
+              description: values.sectionDescription,
+              priceMinor: Number(values.sectionPriceMinor),
+              availableQuantity: Number(values.sectionAvailableQuantity),
+            },
+          }),
         });
         toast("Event created.", "success");
         await load("events");
@@ -1028,18 +1053,14 @@ document.addEventListener("DOMContentLoaded", () => {
         ["venue", "Venue", control.dataset.venue],
         ["city", "City", control.dataset.city],
         ["country", "Country code", control.dataset.country],
-        [
-          "startsAt",
-          "Start date/time (ISO)",
-          new Date(control.dataset.startsAt).toISOString(),
-        ],
+        ...eventDateTimeFields(control.dataset.startsAt),
         ["currency", "Currency", control.dataset.currency],
         ["description", "Description", control.dataset.description],
       ]);
       if (values)
         return mutate(
           `/admin/events/${control.dataset.id}`,
-          values,
+          { ...values, startsAt: eventStartsAt(values) },
           "events",
           "Event updated.",
           "PATCH",
