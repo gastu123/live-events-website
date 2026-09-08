@@ -1016,6 +1016,8 @@ export function adminRoutes({ db, auth, config }) {
             bankName.length > 160 ||
             accountNumber.length < 4 ||
             accountNumber.length > 100)) ||
+        (paymentMethod !== "gift_card" &&
+          (accountName.length < 2 || accountName.length > 160)) ||
         (paymentMethod !== "bank_transfer" &&
           paymentMethod !== "gift_card" &&
           (paymentIdentifier.length < 2 || paymentIdentifier.length > 500)) ||

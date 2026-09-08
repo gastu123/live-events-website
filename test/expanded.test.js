@@ -820,9 +820,9 @@ for (const [label, offset] of [
     assert.equal(response.body.error.code, "PAYMENT_DETAILS_INVALID");
   });
 for (const details of [
-  { method: "paypal", paymentIdentifier: "billing@example.com" },
-  { method: "cash_app", paymentIdentifier: "$ExampleEvents" },
-  { method: "chime", paymentIdentifier: "chime@example.com" },
+  { method: "paypal", accountName: "Example Events LLC", paymentIdentifier: "billing@example.com" },
+  { method: "cash_app", accountName: "Example Events LLC", paymentIdentifier: "$ExampleEvents" },
+  { method: "chime", accountName: "Example Events LLC", paymentIdentifier: "chime@example.com" },
   { method: "bank_transfer", bankName: "Example Bank", accountName: "Example Events LLC", accountNumber: "1234567890" },
   { method: "gift_card" },
 ])

@@ -291,9 +291,16 @@ document.addEventListener("DOMContentLoaded", () => {
           addField("bankName", "Bank name");
           addField("accountName", "Account name");
           addField("accountNumber", "Account number");
-        } else if (method.value === "paypal") addField("paymentIdentifier", "PayPal email or account identifier");
-        else if (method.value === "cash_app") addField("paymentIdentifier", "Cash App $Cashtag");
-        else addField("paymentIdentifier", "Chime receiving identifier");
+        } else if (method.value === "paypal") {
+          addField("accountName", "PayPal account name");
+          addField("paymentIdentifier", "PayPal email or account identifier");
+        } else if (method.value === "cash_app") {
+          addField("accountName", "Cash App account name");
+          addField("paymentIdentifier", "Cash App $Cashtag");
+        } else {
+          addField("accountName", "Chime account name");
+          addField("paymentIdentifier", "Chime receiving identifier");
+        }
         if (method.value !== "gift_card") addField("instructions", "Optional payment instructions", false, "textarea");
         const expiry = el("select", { name: "expiresInHours", required: true });
         [["1", "1 hour"], ["6", "6 hours"], ["24", "24 hours"], ["72", "3 days"], ["168", "7 days"]].forEach(([value, text], index) =>

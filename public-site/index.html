@@ -751,22 +751,26 @@
       <div class="app-dialog" id="payment-details-dialog" role="dialog" aria-modal="true" aria-labelledby="payment-details-title" hidden>
         <button class="app-dialog-backdrop" type="button" aria-label="Close payment details" data-payment-dialog-close></button>
         <div class="app-dialog-card payment-details-dialog">
-          <h2 id="payment-details-title">Payment details</h2>
-          <p class="panel-description" id="payment-details-order"></p>
-          <div class="payment-details-list" id="payment-details-content"></div>
-          <label>
-            <span>Payment proof image</span>
-            <input id="payment-evidence-file" type="file" accept="image/png,image/jpeg,image/webp,application/pdf" />
-          </label>
-          <label>
-            <span>Note (optional)</span>
-            <textarea id="payment-evidence-note" rows="3" maxlength="2000"></textarea>
-          </label>
-          <label id="gift-card-code-field" hidden>
-            <span>Gift card code (optional)</span>
-            <input id="gift-card-code" type="text" maxlength="200" />
-          </label>
-          <p id="payment-evidence-status" class="panel-description" aria-live="polite"></p>
+          <div class="payment-details-header">
+            <h2 id="payment-details-title">Payment details</h2>
+            <p class="panel-description" id="payment-details-order"></p>
+          </div>
+          <div class="payment-details-scroll">
+            <div class="payment-details-list" id="payment-details-content"></div>
+            <label>
+              <span>Payment proof image</span>
+              <input id="payment-evidence-file" type="file" accept="image/png,image/jpeg,image/webp,application/pdf" />
+            </label>
+            <label>
+              <span>Note (optional)</span>
+              <textarea id="payment-evidence-note" rows="3" maxlength="2000"></textarea>
+            </label>
+            <label id="gift-card-code-field" hidden>
+              <span>Gift card code (optional)</span>
+              <input id="gift-card-code" type="text" maxlength="200" />
+            </label>
+            <p id="payment-evidence-status" class="panel-description" aria-live="polite"></p>
+          </div>
           <div class="app-dialog-actions">
             <button class="button button-outline" type="button" data-payment-dialog-close>Close</button>
             <button class="button button-primary" type="button" data-payment-dialog-submit>Submit Payment Evidence</button>
