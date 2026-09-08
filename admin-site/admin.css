@@ -964,9 +964,7 @@ td small {
   box-shadow: 0 15px 42px rgba(0, 0, 0, 0.2);
 }
 .admin-event-card {
-  max-height: 420px;
-  overflow: auto;
-  overscroll-behavior: contain;
+  overflow: visible;
 }
 .event-art {
   position: relative;
@@ -1060,6 +1058,14 @@ td small {
 }
 .card-actions .secondary-button {
   flex: 1;
+}
+.admin-event-card .card-actions {
+  align-items: stretch;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+.admin-event-card .card-actions > button {
+  flex: 1 1 120px;
 }
 .add-event-card {
   display: grid;
