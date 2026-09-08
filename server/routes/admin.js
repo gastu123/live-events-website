@@ -1,7 +1,7 @@
 import { Router } from "express";
 import crypto from "node:crypto";
 import { asyncRoute, HttpError, ok } from "../http.js";
-import { eventInput, parse, phoneCountry, recoveryPhone, sectionInput, strongPassword, uuid } from "../schemas.js";
+import { eventInput, eventWithSectionInput, parse, phoneCountry, recoveryPhone, sectionInput, strongPassword, uuid } from "../schemas.js";
 
 const audit = (client, req, action, type, id, metadata = {}) =>
   client.query(
@@ -85,28 +85,47 @@ export function adminRoutes({ db, auth, config }) {
     "/events",
     auth.requireAdmin(["events.write"]),
     asyncRoute(async (req, res) => {
-      const i = parse(eventInput, req.body);
+      const i = parse(eventWithSectionInput, req.body);
       const slug = `${i.title
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/^-|-$/g, "")}-${Date.now().toString(36)}`;
-      const row = (
-        await db.query(
-          "insert into events(title,slug,description,venue,city,country,starts_at,currency,status,created_by) values($1,$2,$3,$4,$5,$6,$7,$8,'published',$9) returning *",
-          [
-            i.title,
-            slug,
-            i.description,
-            i.venue,
-            i.city,
-            i.country,
-            i.startsAt,
-            i.currency,
-            req.admin.id,
-          ],
-        )
-      ).rows[0];
-      await audit(db, req, "event.create", "event", row.id);
+      const row = await db.transaction(async (client) => {
+        const event = (
+          await client.query(
+            "insert into events(title,slug,description,venue,city,country,starts_at,currency,status,created_by) values($1,$2,$3,$4,$5,$6,$7,$8,'published',$9) returning *",
+            [
+              i.title,
+              slug,
+              i.description,
+              i.venue,
+              i.city,
+              i.country,
+              i.startsAt,
+              i.currency,
+              req.admin.id,
+            ],
+          )
+        ).rows[0];
+        await audit(client, req, "event.create", "event", event.id);
+        const section = (
+          await client.query(
+            "insert into event_sections(event_id,name,description,price_minor) values($1,$2,$3,$4) returning *",
+            [
+              event.id,
+              i.section.name,
+              i.section.description,
+              i.section.priceMinor,
+            ],
+          )
+        ).rows[0];
+        await client.query(
+          "insert into ticket_inventory(section_id,available_quantity,held_quantity,sold_quantity) values($1,$2,0,0)",
+          [section.id, i.section.availableQuantity],
+        );
+        await audit(client, req, "inventory.create", "event_section", section.id);
+        return event;
+      });
       ok(res, row, 201);
     }),
   );

@@ -43,6 +43,9 @@ export const sectionInput = z.object({
   priceMinor: z.number().int().positive(),
   availableQuantity: z.number().int().nonnegative(),
 });
+export const eventWithSectionInput = eventInput.extend({
+  section: sectionInput,
+});
 export const orderInput = z.object({
   eventId: uuid,
   sectionId: uuid,

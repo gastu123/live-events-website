@@ -201,27 +201,33 @@ test("admin login records a successful attempt", async () => {
   assert.ok(sql.some((text) => text.includes("audit_logs")));
 });
 test("admin-created events are published so the public site can list them", async () => {
+  const statements = [];
   const db = {
-    query: async (text, params) => {
-      if (text.startsWith("insert into events"))
-        return {
-          rows: [{
-            id: "e1",
-            title: params[0],
-            slug: params[1],
-            description: params[2],
-            venue: params[3],
-            city: params[4],
-            country: params[5],
-            starts_at: params[6],
-            currency: params[7],
-            status: "published",
-            created_by: params[8],
-          }],
-        };
-      if (text.includes("insert into audit_logs")) return { rows: [] };
-      return { rows: [] };
-    },
+    transaction: async (work) =>
+      work({
+        query: async (text, params) => {
+          statements.push(text);
+          if (text.startsWith("insert into events"))
+            return {
+              rows: [{
+                id: "e1",
+                title: params[0],
+                slug: params[1],
+                description: params[2],
+                venue: params[3],
+                city: params[4],
+                country: params[5],
+                starts_at: params[6],
+                currency: params[7],
+                status: "published",
+                created_by: params[8],
+              }],
+            };
+          if (text.startsWith("insert into event_sections"))
+            return { rows: [{ id: "section-1" }] };
+          return { rows: [] };
+        },
+      }),
   };
   const r = await request(makeApp(db))
     .post("/api/v1/admin/events")
@@ -233,9 +239,122 @@ test("admin-created events are published so the public site can list them", asyn
       startsAt: "2027-02-20T19:30:00.000Z",
       currency: "USD",
       description: "A test event",
+      section: {
+        name: "General Admission",
+        description: "Order-request section",
+        priceMinor: 9800,
+        availableQuantity: 300,
+      },
     });
   assert.equal(r.status, 201);
   assert.equal(r.body.data.status, "published");
+  assert.ok(statements.some((text) => text.startsWith("insert into event_sections")));
+  assert.ok(statements.some((text) => text.startsWith("insert into ticket_inventory")));
+  assert.equal(
+    statements.filter((text) => text.includes("insert into audit_logs")).length,
+    2,
+  );
+});
+test("atomic event creation rolls back when inventory creation fails", async () => {
+  let committed = false;
+  let rolledBack = false;
+  const db = {
+    transaction: async (work) => {
+      const client = {
+        query: async (text) => {
+          if (text.startsWith("insert into events"))
+            return { rows: [{ id: "e1", status: "published" }] };
+          if (text.startsWith("insert into event_sections"))
+            return { rows: [{ id: "section-1" }] };
+          if (text.startsWith("insert into ticket_inventory"))
+            throw new Error("inventory constraint failed");
+          return { rows: [] };
+        },
+      };
+      try {
+        const result = await work(client);
+        committed = true;
+        return result;
+      } catch (error) {
+        rolledBack = true;
+        throw error;
+      }
+    },
+  };
+  const r = await request(makeApp(db))
+    .post("/api/v1/admin/events")
+    .send({
+      title: "Rollback Night",
+      venue: "Grand Hall",
+      city: "Lagos",
+      country: "NG",
+      startsAt: "2027-02-20T19:30:00.000Z",
+      currency: "USD",
+      section: {
+        name: "General Admission",
+        description: "Order-request section",
+        priceMinor: 9800,
+        availableQuantity: 300,
+      },
+    });
+  assert.equal(r.status, 500);
+  assert.equal(committed, false);
+  assert.equal(rolledBack, true);
+});
+test("atomic event creation is immediately returned by the public event listing", async () => {
+  const state = { event: null, section: null, inventory: null };
+  const db = {
+    transaction: async (work) => {
+      const pending = { ...state };
+      const result = await work({
+        query: async (text, params) => {
+          if (text.startsWith("insert into events")) {
+            pending.event = {
+              id: "e1",
+              slug: params[1],
+              title: params[0],
+              status: "published",
+              deleted_at: null,
+            };
+            return { rows: [pending.event] };
+          }
+          if (text.startsWith("insert into event_sections")) {
+            pending.section = { id: "section-1", event_id: "e1" };
+            return { rows: [pending.section] };
+          }
+          if (text.startsWith("insert into ticket_inventory")) {
+            pending.inventory = { section_id: "section-1" };
+            return { rows: [] };
+          }
+          return { rows: [] };
+        },
+      });
+      Object.assign(state, pending);
+      return result;
+    },
+    query: async (text) =>
+      text.startsWith("select e.id,e.slug") && state.event && state.section && state.inventory
+        ? { rows: [{ id: "e1", slug: state.event.slug, title: state.event.title }] }
+        : { rows: [] },
+  };
+  const create = await request(makeApp(db)).post("/api/v1/admin/events").send({
+    title: "Visible Night",
+    venue: "Grand Hall",
+    city: "Lagos",
+    country: "NG",
+    startsAt: "2027-02-20T19:30:00.000Z",
+    currency: "USD",
+    section: {
+      name: "General Admission",
+      description: "Order-request section",
+      priceMinor: 9800,
+      availableQuantity: 300,
+    },
+  });
+  assert.equal(create.status, 201);
+  const publicEvents = await request(makeApp(db)).get("/api/v1/events");
+  assert.equal(publicEvents.status, 200);
+  assert.equal(publicEvents.body.data[0].title, "Visible Night");
 });
 test("role middleware denies protected admin operations", async () => {
   const db = { query: async () => ({ rows: [] }) };
@@ -300,16 +419,21 @@ test("public event detail returns server sections", async () => {
 test("admin event creation writes an audit log", async () => {
   const statements = [];
   const db = {
-    query: async (text) => {
-      statements.push(text);
-      if (text.startsWith("insert into events"))
-        return {
-          rows: [
-            { id: "10000000-0000-4000-8000-000000000001", title: "New Event" },
-          ],
-        };
-      return { rows: [] };
-    },
+    transaction: async (work) =>
+      work({
+        query: async (text) => {
+          statements.push(text);
+          if (text.startsWith("insert into events"))
+            return {
+              rows: [
+                { id: "10000000-0000-4000-8000-000000000001", title: "New Event" },
+              ],
+            };
+          if (text.startsWith("insert into event_sections"))
+            return { rows: [{ id: "section-1" }] };
+          return { rows: [] };
+        },
+      }),
   };
   const r = await request(makeApp(db)).post("/api/v1/admin/events").send({
     title: "New Event",
@@ -319,6 +443,12 @@ test("admin event creation writes an audit log", async () => {
     country: "NG",
     startsAt: "2027-01-01T18:00:00.000Z",
     currency: "USD",
+    section: {
+      name: "General Admission",
+      description: "Order-request section",
+      priceMinor: 9800,
+      availableQuantity: 300,
+    },
   });
   assert.equal(r.status, 201);
   assert.ok(statements.some((text) => text.includes("audit_logs")));
