@@ -647,7 +647,7 @@ export function adminRoutes({ db, auth, config }) {
       if (target.is_super_admin && status === "disabled")
         throw new HttpError(409, "SUPER_ADMIN_PROTECTED", "A Super Administrator cannot be deactivated.");
       const row = (await db.query(
-        "update admin_users set status=$2,deactivated_at=case when $2='disabled' then now() else null end,deactivated_by=case when $2='disabled' then $3 else null end,updated_at=now() where id=$1 returning id,status",
+        "update admin_users set status=$2,deactivated_at=case when $2='disabled' then now() else null end,deactivated_by=case when $2='disabled' then $3::uuid else null end,updated_at=now() where id=$1 returning id,status",
         [req.params.id, status, req.admin.id],
       )).rows[0];
       await audit(db, req, `admin.${status === 'active' ? 'activate' : 'deactivate'}`, "admin_user", row.id);
